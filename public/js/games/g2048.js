@@ -101,6 +101,8 @@ export default class G2048 {
     if (!moved) return;
     this.score += gained;
     if (gained > 0) { this.hooks.onScore(this.score); window.vaultSfx?.blip(440 + Math.min(gained, 800), 0.05); }
+    // "The Number" — reach the 2048 tile
+    if (this.grid.some((row) => row.some((v) => v >= 2048))) window.vaultAward?.("tile2048");
     this.spawn();
     if (!this.canMove()) {
       this.over = true;

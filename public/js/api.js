@@ -41,6 +41,7 @@ export function setSession(token, username) {
 export function clearSession() {
   store.remove("vault_token");
   store.remove("vault_username");
+  store.remove("vault_role");
 }
 
 // Base URL for API calls. Empty for same-origin hosting; can be set to a
@@ -65,12 +66,13 @@ export async function apiFetch(path, options = {}) {
 
 // ---------- Auth ----------
 
-export async function signup(username, password) {
+export async function signup(username, password, avatar) {
   const data = await apiFetch("/api/signup", {
     method: "POST",
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, avatar }),
   });
   setSession(data.token, data.username);
+  store.set("vault_role", data.role || "user");
   return data;
 }
 
@@ -80,6 +82,7 @@ export async function login(username, password) {
     body: JSON.stringify({ username, password }),
   });
   setSession(data.token, data.username);
+  store.set("vault_role", data.role || "user");
   return data;
 }
 
@@ -107,5 +110,59 @@ export async function postMessage(text) {
   return apiFetch("/api/messages", {
     method: "POST",
     body: JSON.stringify({ text }),
+  });
+}
+
+// ---------- Reactions / moderation / typing ----------
+
+export async function reactToMessage(id, emoji) {
+  return apiFetch(`/api/messages/${id}/react`, {
+    method: "POST",
+    body: JSON.stringify({ emoji }),
+  });
+}
+
+export async function deleteMessage(id) {
+  return apiFetch(`/api/messages/${id}`, { method: "DELETE" });
+}
+
+export async function setTyping() {
+  return apiFetch("/api/typing", { method: "POST" });
+}
+
+// ---------- DMs ----------
+
+export async function sendDM(to, text) {
+  return apiFetch("/api/dms", {
+    method: "POST",
+    body: JSON.stringify({ to, text }),
+  });
+}
+
+export async function getDMs(withUser, afterId) {
+  return apiFetch(`/api/dms?with=${encodeURIComponent(withUser)}&after=${encodeURIComponent(afterId || 0)}`);
+}
+
+// ---------- Leaderboard / achievements ----------
+
+export async function getLeaderboard() {
+  return apiFetch("/api/leaderboard");
+}
+
+export async function submitScore(game, score) {
+  return apiFetch("/api/scores", {
+    method: "POST",
+    body: JSON.stringify({ game, score }),
+  });
+}
+
+export async function getAchievements() {
+  return apiFetch("/api/achievements");
+}
+
+export async function awardAchievement(id) {
+  return apiFetch("/api/achievements", {
+    method: "POST",
+    body: JSON.stringify({ id }),
   });
 }

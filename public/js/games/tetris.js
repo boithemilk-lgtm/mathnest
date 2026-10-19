@@ -96,6 +96,7 @@ export default class Tetris {
     }
     if (cleared) {
       this.lines += cleared;
+      if (this.lines >= 10) window.vaultAward?.("blockfall10"); // "Tetromancer"
       this.score += [0, 100, 300, 500, 800][cleared] * this.level;
       this.level = 1 + Math.floor(this.lines / 10);
       this.dropMs = Math.max(120, 800 - (this.level - 1) * 70);

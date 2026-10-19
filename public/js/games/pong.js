@@ -96,6 +96,7 @@ export default class Pong {
 
     if (this.ps >= 7 || this.as >= 7) {
       this.over = true;
+      if (this.ps >= 7) window.vaultAward?.("pongchamp"); // "Machine Slayer"
       this.hooks.onGameOver(this.ps);
     }
   }

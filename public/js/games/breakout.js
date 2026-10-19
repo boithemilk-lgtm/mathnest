@@ -106,6 +106,7 @@ export default class Breakout {
     }
     if (this.bricks.every((br) => !br.alive)) {
       this.won = true;
+      window.vaultAward?.("brickmaster"); // "Bricklayer's Union" — clear every brick
       this.hooks.onGameOver(this.score);
     }
 

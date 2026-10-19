@@ -30,12 +30,43 @@ const DB_FILE = path.join(DATA_DIR, "db.json");
 
 function emptyDb() {
   return {
-    users: {},        // username -> { salt, hash, created }
+    users: {},        // username -> { salt, hash, created, avatar, role, msgCount }
     sessions: {},     // token   -> { user, expires }
-    messages: [],     // { id, user, text, ts }
+    messages: [],     // { id, user, text, ts, reactions: {emoji: [usernames]}, deleted }
     nextId: 1,
     presence: {},     // username -> last seen (ms epoch)
+    typing: {},       // username -> last keystroke (ms epoch)
+    dms: {},          // "userA|userB" (sorted) -> [ { id, from, to, text, ts } ]
+    scores: {},       // game id -> [ { user, score, ts } ] (top 10, best per user)
+    achievements: {}, // userKey -> { achievementId: ts }
   };
+}
+
+// Fill in fields added by newer versions so older db.json files keep working.
+function normalizeDb(db) {
+  db.users = db.users || {};
+  for (const u of Object.values(db.users)) {
+    if (!u.avatar) u.avatar = "🎮";
+    if (!u.role) u.role = "user";
+    if (typeof u.msgCount !== "number") u.msgCount = 0;
+  }
+  db.sessions = db.sessions || {};
+  db.messages = db.messages || [];
+  for (const m of db.messages) {
+    if (!m.reactions) m.reactions = {};
+  }
+  db.presence = db.presence || {};
+  db.typing = db.typing || {};
+  db.dms = db.dms || {};
+  db.scores = db.scores || {};
+  db.achievements = db.achievements || {};
+  if (!db.nextId || db.nextId < 1) {
+    let maxId = 0;
+    for (const m of db.messages) if (m.id > maxId) maxId = m.id;
+    for (const arr of Object.values(db.dms)) for (const m of arr) if (m.id > maxId) maxId = m.id;
+    db.nextId = maxId + 1;
+  }
+  return db;
 }
 
 let cache = null;
@@ -91,7 +122,7 @@ export function getDb() {
   try {
     const st = fs.statSync(DB_FILE);
     if (!cache || st.mtimeMs !== cachedMtime) {
-      cache = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+      cache = normalizeDb(JSON.parse(fs.readFileSync(DB_FILE, "utf8")));
       cachedMtime = st.mtimeMs;
     }
     return cache;

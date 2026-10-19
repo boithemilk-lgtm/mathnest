@@ -25,6 +25,7 @@
         </div>
       </div>
       <div class="topbar-right">
+        <button class="btn-ghost theme-btn" id="themeBtn" type="button" title="Switch theme">🎨 Theme</button>
         <a class="exit-link" href="index.html">← MathNest</a>
         <div class="user-chip" id="userChip" hidden></div>
       </div>
@@ -42,9 +43,14 @@
     <section class="panel is-active" data-panel="games" role="tabpanel">
       <div class="panel-head">
         <h2>Pick your poison</h2>
-        <p>Every game is built in — no downloads, no flash. Best scores are saved on this device.</p>
+        <p>Every game is built in — no downloads, no flash. Best scores are saved on this device, and global leaders are on the board below.</p>
       </div>
       <div class="game-grid" id="gameGrid"></div>
+      <div class="leaderboard-card">
+        <h3>🏆 Global leaderboard</h3>
+        <p class="muted">Top scores across the server. Log in and set a record.</p>
+        <div class="leaderboard-grid" id="leaderboardGrid"></div>
+      </div>
     </section>
 
     <!-- ============ CHAT ============ -->
@@ -66,6 +72,10 @@
               <span>Password</span>
               <input id="authPass" type="password" minlength="6" placeholder="6+ characters" autocomplete="current-password" required>
             </label>
+            <div class="field">
+              <span>Pick your avatar</span>
+              <div class="avatar-grid" id="avatarGrid"></div>
+            </div>
             <p class="auth-error" id="authError" role="alert"></p>
             <button class="btn-primary" type="submit" id="authSubmit">Sign up</button>
           </form>
@@ -74,7 +84,12 @@
 
       <div class="chat-layout" id="chatLoggedIn" hidden>
         <div class="chat-main">
+          <div class="dm-bar" id="dmBar" hidden>
+            <button class="btn-ghost" id="dmBack" type="button">← Room</button>
+            <span class="dm-title" id="dmTitle"></span>
+          </div>
           <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <div class="typing-line" id="typingLine" aria-hidden="true"></div>
           <form class="chat-input" id="chatForm">
             <input id="chatText" type="text" maxlength="500" placeholder="Say something…" autocomplete="off">
             <button class="btn-primary" type="submit">Send</button>
@@ -121,6 +136,11 @@
         <p>Little toys for when you need 30 seconds of chaos between rounds.</p>
       </div>
       <div class="extras-grid">
+        <div class="extra-card wide">
+          <h3>🏆 Achievements <span class="ach-count" id="achCount"></span></h3>
+          <p class="muted">Milestones from the games and the chatroom. Log in to start collecting.</p>
+          <div class="trophy-grid" id="trophyGrid"></div>
+        </div>
         <div class="extra-card">
           <h3>🥁 Drum pad</h3>
           <p class="muted">Tap the pads or press keys 1–9.</p>
@@ -140,7 +160,13 @@
             <button class="btn-ghost" id="factBtn" type="button">Another one</button>
           </div>
         </div>
+        <div class="extra-card admin-card" id="adminCard" hidden>
+          <h3>🛡️ Admin</h3>
+          <p class="muted">Vault operator tools.</p>
+          <button class="btn-ghost" id="backupBtn" type="button">⬇ Download backup (db.json)</button>
+        </div>
       </div>
+      <p class="panic-hint muted">Psst — double-tap <strong>Esc</strong> anytime to instantly look busy.</p>
     </section>
   </main>
 
@@ -162,6 +188,38 @@
       <div class="canvas-wrap">
         <canvas id="gameCanvas" width="480" height="480"></canvas>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ REACTION PICKER ============ -->
+  <div class="reaction-picker" id="reactionPicker" hidden></div>
+
+  <!-- ============ ACHIEVEMENT TOAST ============ -->
+  <div class="ach-toast" id="achToast" hidden>
+    <span class="ach-toast-emoji" id="achToastEmoji">🏆</span>
+    <div>
+      <div class="ach-toast-title">Achievement unlocked!</div>
+      <div class="ach-toast-name" id="achToastName"></div>
+    </div>
+  </div>
+
+  <!-- ============ PANIC SCREEN (fake math) ============ -->
+  <div class="panic-screen" id="panicScreen" hidden>
+    <div class="panic-inner">
+      <div class="panic-head">
+        <h2>Math Practice — Quick Quiz</h2>
+        <p class="muted">Solve as many as you can. Answers are checked instantly.</p>
+      </div>
+      <div class="panic-card">
+        <p class="panic-question" id="panicQuestion">7 × 8 = ?</p>
+        <form id="panicForm">
+          <input id="panicAnswer" type="text" inputmode="numeric" placeholder="Your answer" autocomplete="off">
+          <button class="btn-primary" type="submit">Check</button>
+        </form>
+        <p class="panic-feedback" id="panicFeedback"></p>
+        <p class="panic-score muted" id="panicScore">Solved: 0</p>
+      </div>
+      <p class="muted panic-tip">Done practicing? Double-tap Esc to go back.</p>
     </div>
   </div>
 

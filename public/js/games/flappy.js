@@ -78,6 +78,15 @@ export default class Flappy {
   die() {
     this.dead = true;
     window.vaultSfx?.buzz();
+    // cumulative death counter -> "Fifty Falls" achievement
+    // (vaultStore = the api.js storage wrapper: localStorage in production,
+    // in-memory in the hosted preview)
+    const s = window.vaultStore;
+    if (s) {
+      const deaths = ((s.get("vault_flappy_deaths", 0)) || 0) + 1;
+      s.set("vault_flappy_deaths", deaths);
+      if (deaths >= 50) window.vaultAward?.("flappy50");
+    }
     this.hooks.onGameOver(this.score);
   }
 

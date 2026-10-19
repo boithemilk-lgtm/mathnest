@@ -76,6 +76,7 @@ export default class Snake {
     this.snake.unshift([nx, ny]);
     if (nx === this.food[0] && ny === this.food[1]) {
       this.score++;
+      if (this.score >= 100) window.vaultAward?.("snakelord"); // "Snake Lord"
       this.hooks.onScore(this.score);
       this.tickMs = Math.max(65, 130 - this.score * 3);
       window.vaultSfx?.blip(520 + this.score * 12, 0.06);

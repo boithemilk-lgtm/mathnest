@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dungeon of Broken Dreams — The Vault</title>
+<style>
+:root{color-scheme:dark;--bg:#090b12;--panel:#141824;--line:#2b3040;--muted:#9aa2b7;--green:#62e88c;--purple:#a99bff;--red:#ff6e7d;--gold:#ffc766}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#201a32,#090b12 55%);color:#eef0f8;font:15px/1.45 system-ui,Segoe UI,sans-serif;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;border:1px solid #3a4154;border-radius:10px;background:#23293a;color:#f5f5ff;padding:11px 16px;font-weight:700}button:hover{border-color:var(--green);filter:brightness(1.08)}button:disabled{opacity:.45;cursor:not-allowed}input{background:#0d111b;border:1px solid #343b4d;border-radius:10px;color:white;padding:12px;width:100%;outline:none}input:focus{border-color:var(--green)}.wrap{max-width:1200px;margin:auto;padding:20px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.brand{font-weight:900;letter-spacing:.08em}.brand span{color:var(--green)}a{color:#b9b0ff;text-decoration:none}.sub{color:var(--muted)}.panel{background:rgba(20,24,36,.94);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 20px 60px #0004}.lobby{max-width:640px;margin:8vh auto}.lobby h1{font-size:clamp(28px,5vw,44px);line-height:1.05;margin:8px 0 12px}.tag{color:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:900}.forms{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}.forms label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.field{display:flex;flex-direction:column;gap:8px}.field.wide{grid-column:1/-1}.field button{width:100%}.error{color:var(--red);min-height:22px;margin-top:12px}.game{display:none}.game.active{display:block}.hud{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:12px}.stat{padding:12px;background:#141824;border:1px solid var(--line);border-radius:12px}.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.stat strong{font-size:19px}.health{height:7px;background:#33394a;border-radius:9px;overflow:hidden;margin-top:7px}.health i{display:block;height:100%;background:linear-gradient(90deg,#e95269,#ffc766);width:100%;transition:width .15s}.arena{position:relative;border:1px solid #424052;background:#07080e;border-radius:14px;overflow:hidden}.arena canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-action:none}.bottom{display:grid;grid-template-columns:1fr 280px;gap:12px;margin-top:12px}.controls,.log{background:#141824;border:1px solid var(--line);border-radius:12px;padding:14px}.controls h3,.log h3{margin:0 0 8px;font-size:14px}.keys{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0}.key{border:1px solid #41475a;background:#242a3b;padding:5px 8px;border-radius:6px;font:12px ui-monospace,monospace}.actionrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.actionrow button{padding:8px 12px;font-size:13px}.loglines{font-size:12px;color:#c1c6d4;display:flex;flex-direction:column;gap:6px;max-height:140px;overflow:auto}.loglines div{border-bottom:1px solid #272d3b;padding-bottom:5px}.danger{border-color:#723344;color:#ffb1bc}.gold{color:var(--gold)}.status{color:var(--green);font-size:13px}.mobile{display:none}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1d2332;border:1px solid #525b73;border-radius:12px;padding:12px 18px;max-width:90vw;box-shadow:0 8px 30px #0009;z-index:5}.victory{font-size:clamp(20px,4vw,34px);font-weight:900;color:var(--gold);text-align:center;padding:12px}
+@media(max-width:760px){.wrap{padding:12px}.forms{grid-template-columns:1fr}.field.wide{grid-column:auto}.hud{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom{grid-template-columns:1fr}.mobile{display:block}.lobby{margin:4vh auto}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div><div class="brand">THE VAULT <span>/ CO-OP</span></div><div class="sub">A dungeon built on bad decisions and friendship.</div></div><a href="vault.html">← Back to the Vault</a></header>
+<section class="panel lobby" id="lobby">
+  <div class="tag">two adventurers. one exit.</div>
+  <h1>Dungeon of<br><span style="color:var(--purple)">Broken Dreams</span></h1>
+  <p class="sub">You're trapped beneath a ruined kingdom with nothing but a rusty blade and hope. Share loot, fight together, and get out alive. Rooms support two players online.</p>
+  <div class="forms">
+    <div class="field wide"><label for="playerName">YOUR ADVENTURER NAME</label><input id="playerName" maxlength="16" placeholder="e.g. soup_knight" value=""></div>
+    <div class="field"><button id="createBtn">⚔ Create a dungeon</button><span class="sub">Start a room and invite a friend.</span></div>
+    <div class="field"><label for="roomCode">FRIEND'S ROOM CODE</label><input id="roomCode" maxlength="5" placeholder="ABCDE" autocapitalize="characters"><button id="joinBtn">🗝 Join their dungeon</button></div>
+  </div>
+  <div class="error" id="lobbyError" role="status"></div>
+  <p class="sub" style="font-size:12px;margin-top:12px">Tip: this game runs on your MathNest server. Both players need to open the same deployed website.</p>
+</section>
+<section class="game" id="game">
+  <div class="top"><div><div class="tag">Expedition <span id="roomLabel"></span></div><div class="sub" id="roomStatus">Waiting for your friend…</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="copyBtn">Copy invite link</button><button id="leaveBtn" class="danger">Leave run</button></div></div>
+  <div class="hud">
+    <div class="stat"><small>Your health</small><strong id="hpText">100 / 100</strong><div class="health"><i id="hpBar"></i></div></div>
+    <div class="stat"><small>Gold found</small><strong class="gold" id="goldText">0</strong></div>
+    <div class="stat"><small>Monsters remaining</small><strong id="monsterText">7</strong></div>
+    <div class="stat"><small>Partner</small><strong id="partnerText">Waiting…</strong></div>
+    <div class="stat"><small>Sprint stamina</small><strong id="staminaText">100%</strong><div class="health"><i id="staminaBar" style="background:linear-gradient(90deg,#62e88c,#b9f7d0)"></i></div></div>
+  </div>
+  <div class="arena"><canvas id="world" width="960" height="720" aria-label="First-person 3D dungeon co-op game"></canvas><div class="victory" id="victory" hidden></div></div>
+  <div class="bottom">
+    <div class="controls"><h3>Survival guide</h3><div class="keys"><span class="key">W A S D move</span><span class="key">SHIFT sprint</span><span class="key">← → turn</span><span class="key">drag mouse look</span><span class="key">M map</span><span class="key">SPACE attack</span><span class="key">E loot</span><span class="key">R revive</span><span class="key">X exit</span></div><p class="sub" style="font-size:13px">Monsters chase the nearest living player. Stay close enough to revive your friend, grab potions when you're hurt, and don't rush the exit before the dungeon is clear.</p><div class="actionrow"><button id="attackBtn">⚔ Attack</button><button id="lootBtn">✦ Pick up loot</button><button id="reviveBtn">♥ Revive friend</button><button id="exitBtn">🚪 Break the seal</button></div><p class="status" id="connectionStatus">Connecting…</p></div>
+    <aside class="log"><h3>Dungeon whispers</h3><div class="loglines" id="loglines"></div></aside>
+  </div>
+</section>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(() => {
+const $=id=>document.getElementById(id), lobby=$("lobby"), game=$("game"), canvas=$("world"),ctx=canvas.getContext("2d");
+let code="",playerId="",room=null,me=null,local={x:3,y:3,facing:1,angle:0},keys=new Set(),lastUpdate=0,lastAction=0,polling=false,loopId=0,toastTimer=null,anim=0,leaving=false,stamina=100,showMap=false,wallCells=new Set();
+const TILE=40, W=24,H=18;
+function showToast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,2500);}
+async function api(path,body){const r=await fetch(path,{method:body?"POST":"GET",headers:body?{"content-type":"application/json"}:{},body:body?JSON.stringify(body):undefined,cache:"no-store"});let data;try{data=await r.json()}catch{data={error:"Server returned an unreadable response."}}if(!r.ok)throw new Error(data.error||"Request failed");return data;}
+function name(){return $("playerName").value.trim().slice(0,16)||"wanderer";}
+async function start(kind){$("lobbyError").textContent="";$("createBtn").disabled=$("joinBtn").disabled=true;try{let d;if(kind==="create")d=await api("/api/dungeon/create",{name:name()});else d=await api("/api/dungeon/join",{name:name(),code:$("roomCode").value.trim().toUpperCase()});code=d.code;playerId=d.playerId;room=d.room;wallCells=new Set(room.walls.map(w=>w.y*W+w.x));me=room.players.find(p=>p.id===playerId);local={x:me.x,y:me.y,facing:me.facing,angle:0};lobby.style.display="none";game.classList.add("active");$("roomLabel").textContent="#"+code;$("roomCode").value=code;history.replaceState(null,"",location.pathname+"?room="+code);syncHud();if(loopId)cancelAnimationFrame(loopId);anim=0;frame();poll();}catch(e){$("lobbyError").textContent=e.message;}finally{$("createBtn").disabled=$("joinBtn").disabled=false;}}
+$("createBtn").addEventListener("click",()=>start("create"));$("joinBtn").addEventListener("click",()=>start("join"));$("roomCode").addEventListener("input",e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5));
+const urlCode=new URLSearchParams(location.search).get("room");if(urlCode){$("roomCode").value=urlCode.toUpperCase();$("lobbyError").textContent="Your friend shared a room code. Enter your name and tap Join.";}
+async function poll(){if(!code||leaving)return;try{const d=await api(`/api/dungeon/state?code=${encodeURIComponent(code)}&playerId=${encodeURIComponent(playerId)}`);room=d.room;me=room.players.find(p=>p.id===playerId);if(me){local.x=local.x*.68+me.x*.32;local.y=local.y*.68+me.y*.32;}syncHud();$("connectionStatus").textContent="● Connected · syncing with your partner";$("connectionStatus").style.color="var(--green)";}catch(e){$("connectionStatus").textContent="Connection issue: "+e.message;$("connectionStatus").style.color="var(--red)";}setTimeout(poll,350);}
+function syncHud(){if(!room||!me)return;$("hpText").textContent=`${me.hp} / ${me.maxHp}`;$("hpBar").style.width=Math.max(0,me.hp/me.maxHp*100)+"%";$("goldText").textContent=me.gold;$("monsterText").textContent=room.enemies.filter(m=>m.alive).length;const partner=room.players.find(p=>p.id!==playerId);$("partnerText").textContent=partner?`${partner.name} · ${partner.hp} HP`:"Waiting…";$("staminaText").textContent=Math.round(stamina)+"%";$("staminaBar").style.width=stamina+"%";$("roomStatus").textContent=partner?"You are not alone down here.":"Send your friend code "+code+" — waiting for them to enter…";$("loglines").replaceChildren(...room.log.slice(-6).reverse().map(l=>{const d=document.createElement("div");d.textContent=l.text;return d;}));if(room.escaped){$("victory").hidden=false;$("victory").textContent="✦ YOU ESCAPED TOGETHER ✦";}else $("victory").hidden=true;}
+async function sendUpdate(){if(!room||!me||Date.now()-lastUpdate<100)return;lastUpdate=Date.now();try{await api(`/api/dungeon/update?code=${code}`,{playerId,x:local.x,y:local.y,facing:local.facing});}catch{}}
+async function action(a){if(!room||!me||Date.now()-lastAction<150)return;lastAction=Date.now();try{const d=await api(`/api/dungeon/action?code=${code}`,{playerId,action:a});if(d.room){room=d.room;me=room.players.find(p=>p.id===playerId);syncHud();}}catch(e){if(e.message!=="Catch your breath.")showToast(e.message);}}
+$("attackBtn").onclick=()=>action("attack");$("lootBtn").onclick=()=>action("pickup");$("reviveBtn").onclick=()=>action("revive");$("exitBtn").onclick=()=>action("exit");$("copyBtn").onclick=async()=>{const link=location.origin+location.pathname+"?room="+code;try{await navigator.clipboard.writeText(link);showToast("Invite link copied! Room code: "+code);}catch{showToast("Give your friend room code: "+code);}};
+$("leaveBtn").onclick=async()=>{leaving=true;try{await api(`/api/dungeon/leave?code=${code}`,{playerId});}catch{}code="";room=null;me=null;leaving=false;game.classList.remove("active");lobby.style.display="block";history.replaceState(null,"",location.pathname);};
+function wallAt(x,y){return wallCells.has(Math.floor(y)*W+Math.floor(x));}
+function move(){
+  if(!me||me.hp<=0||room?.escaped)return;
+  const sprint=keys.has("shift")&&stamina>0;const step=sprint?.12:.075;if(sprint)stamina=Math.max(0,stamina-.32);else stamina=Math.min(100,stamina+.12);const a=local.angle;
+  let forward=(keys.has("w")?1:0)-(keys.has("s")?1:0);
+  let strafe=(keys.has("d")?1:0)-(keys.has("a")?1:0);
+  if(!forward&&!strafe)return;
+  const mag=Math.hypot(forward,strafe)||1;forward/=mag;strafe/=mag;
+  const dx=(Math.cos(a)*forward+Math.cos(a+Math.PI/2)*strafe)*step;
+  const dy=(Math.sin(a)*forward+Math.sin(a+Math.PI/2)*strafe)*step;
+  const nx=local.x+dx,ny=local.y+dy;
+  if(!wallAt(nx,local.y))local.x=Math.max(1.05,Math.min(W-1.05,nx));
+  if(!wallAt(local.x,ny))local.y=Math.max(1.05,Math.min(H-1.05,ny));
+  local.facing=Math.cos(a)>=0?1:-1;sendUpdate();
+}
+let dragging=false,lastMouseX=0;
+canvas.addEventListener("pointerdown",e=>{dragging=true;lastMouseX=e.clientX;canvas.setPointerCapture?.(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{if(!dragging)return;const dx=e.clientX-lastMouseX;lastMouseX=e.clientX;local.angle+=dx*.008;});
+canvas.addEventListener("pointerup",()=>dragging=false);canvas.addEventListener("pointercancel",()=>dragging=false);
+window.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k))e.preventDefault();keys.add(k);if(e.repeat)return;if(k==="m")showMap=!showMap;if(k===" "||k==="j")action("attack");if(k==="e")action("pickup");if(k==="r")action("revive");if(k==="x")action("exit");});
+window.addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));window.addEventListener("blur",()=>keys.clear());
+function castRay(angle){
+  const px=local.x,py=local.y,rx=Math.cos(angle),ry=Math.sin(angle);
+  let mx=Math.floor(px),my=Math.floor(py),side=0,dist=0;
+  const ddx=Math.abs(1/(rx||1e-9)),ddy=Math.abs(1/(ry||1e-9));
+  const sx=rx<0?-1:1,sy=ry<0?-1:1;
+  let sdx=rx<0?(px-mx)*ddx:(mx+1-px)*ddx;
+  let sdy=ry<0?(py-my)*ddy:(my+1-py)*ddy;
+  for(let i=0;i<48;i++){
+    if(sdx<sdy){sdx+=ddx;mx+=sx;side=0;dist=sdx-ddx;}else{sdy+=ddy;my+=sy;side=1;dist=sdy-ddy;}
+    if(mx<0||my<0||mx>=W||my>=H||wallCells.has(my*W+mx))return {dist:Math.max(.05,dist),side,mx,my};
+  }
+  return {dist:24,side:0,mx,my};
+}
+function draw(){
+  const cw=canvas.width,ch=canvas.height;if(!room){ctx.fillStyle="#080b12";ctx.fillRect(0,0,cw,ch);return;}
+  const horizon=Math.floor(ch*.48);
+  const sky=ctx.createLinearGradient(0,0,0,horizon);sky.addColorStop(0,"#090c18");sky.addColorStop(1,"#29243b");ctx.fillStyle=sky;ctx.fillRect(0,0,cw,horizon);
+  const floor=ctx.createLinearGradient(0,horizon,0,ch);floor.addColorStop(0,"#282333");floor.addColorStop(1,"#07090e");ctx.fillStyle=floor;ctx.fillRect(0,horizon,cw,ch-horizon);
+  // Distant torch glow gives the corridor depth and atmosphere.
+  const glow=ctx.createRadialGradient(cw*.52,horizon*.92,2,cw*.52,horizon,Math.min(cw*.55,ch*.6));glow.addColorStop(0,"#f2a34a26");glow.addColorStop(1,"#f2a34a00");ctx.fillStyle=glow;ctx.fillRect(0,0,cw,ch);
+  const fov=Math.PI/2.85, depthBuffer=new Float32Array(cw);
+  for(let x=0;x<cw;x+=2){
+    const camera=(x/cw-.5)*fov,hit=castRay(local.angle+camera),dist=Math.max(.08,hit.dist*Math.cos(camera));
+    depthBuffer[x]=depthBuffer[x+1]||dist;const wallH=Math.min(ch*1.6,ch/(dist*.78));const top=horizon-wallH/2;
+    const texture=(hit.mx*7+hit.my*11)%3;let shade=Math.max(35,155-dist*11-(hit.side?30:0));
+    ctx.fillStyle=texture===0?`rgb(${shade*.76},${shade*.72},${shade*.9})`:texture===1?`rgb(${shade*.62},${shade*.6},${shade*.75})`:`rgb(${shade*.8},${shade*.72},${shade*.7})`;
+    ctx.fillRect(x,top,2,wallH);
+    ctx.fillStyle="rgba(7,8,14,.18)";ctx.fillRect(x,top,2,Math.max(2,wallH*.025));
+    if(x%8===0){ctx.fillStyle="rgba(5,6,12,.24)";ctx.fillRect(x,top,1,wallH);}
+  }
+  // Floor perspective seams.
+  ctx.lineWidth=1;ctx.strokeStyle="#a58cbb14";for(let i=1;i<12;i++){const y=horizon+(i/12)**2*(ch-horizon);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cw,y);ctx.stroke();}
+  const objects=[];
+  for(const m of room.enemies)if(m.alive)objects.push({type:"enemy",obj:m,x:m.x,y:m.y,emoji:m.emoji,label:m.name,hp:m.hp,maxHp:m.maxHp});
+  for(const l of room.loot)objects.push({type:"loot",obj:l,x:l.x+.5,y:l.y+.5,emoji:l.emoji,label:l.name});
+  for(const p of room.players){if(p.id===playerId)continue;objects.push({type:"player",obj:p,x:p.x,y:p.y,emoji:p.hp>0?"🧙":"🛡️",label:p.name,hp:p.hp,maxHp:p.maxHp,color:p.color});}
+  const dirX=Math.cos(local.angle),dirY=Math.sin(local.angle),planeX=-dirY*Math.tan(fov/2),planeY=dirX*Math.tan(fov/2);
+  objects.map(o=>({...o,dx:o.x-local.x,dy:o.y-local.y})).sort((a,b)=>(b.dx*b.dx+b.dy*b.dy)-(a.dx*a.dx+a.dy*a.dy)).forEach(o=>{
+    const inv=1/(planeX*dirY-dirX*planeY),tx=inv*(dirY*o.dx-dirX*o.dy),ty=inv*(-planeY*o.dx+planeX*o.dy);
+    if(ty<=.18)return;const sx=cw/2*(1+tx/ty);if(sx< -100||sx>cw+100)return;
+    const size=Math.min(ch*1.15,ch/(ty*.85));if(size<3)return;
+    const depth=ty,rayIndex=Math.max(0,Math.min(cw-1,Math.floor(sx)));if(depth>(depthBuffer[rayIndex]||99)+.2)return;
+    const baseY=horizon+size*.44,top=baseY-size;
+    if(o.type==="enemy"){
+      ctx.fillStyle="#0008";ctx.beginPath();ctx.ellipse(sx,baseY-size*.03,size*.22,size*.07,0,0,Math.PI*2);ctx.fill();
+      ctx.font=`${Math.max(12,size*.58)}px system-ui`;ctx.textAlign="center";ctx.fillText(o.emoji,sx,baseY);
+      const bw=size*.55,bh=Math.max(3,size*.045);ctx.fillStyle="#190f1c";ctx.fillRect(sx-bw/2,top+size*.18,bw,bh);ctx.fillStyle="#fa667a";ctx.fillRect(sx-bw/2,top+size*.18,bw*Math.max(0,o.hp/o.maxHp),bh);
+      if(size>40){ctx.font=`${Math.max(9,size*.085)}px system-ui`;ctx.fillStyle="#fff0f5";ctx.fillText(o.label,sx,top+size*.12);}
+    }else if(o.type==="loot"){
+      ctx.fillStyle="#ffc76635";ctx.beginPath();ctx.arc(sx,baseY-size*.18,size*.25,0,Math.PI*2);ctx.fill();ctx.font=`${Math.max(13,size*.46)}px system-ui`;ctx.textAlign="center";ctx.fillText(o.emoji,sx,baseY);
+    }else{
+      ctx.fillStyle=o.color||"#8b7cf8";ctx.beginPath();ctx.ellipse(sx,baseY-size*.1,size*.2,size*.3,0,0,Math.PI*2);ctx.fill();ctx.font=`${Math.max(11,size*.28)}px system-ui`;ctx.textAlign="center";ctx.fillText(o.emoji,sx,baseY-size*.18);ctx.font=`${Math.max(9,size*.08)}px system-ui`;ctx.fillStyle="#fff";ctx.fillText(o.label,sx,top);
+    }
+  });
+  // First-person relic blade, subtly bobbing with movement.
+  const bob=(keys.has("w")||keys.has("s")||keys.has("a")||keys.has("d"))?Math.sin(anim*.22)*5:Math.sin(anim*.035)*1.5;
+  ctx.save();ctx.translate(cw*.84,ch*.89+bob);ctx.rotate(-.14);
+  ctx.fillStyle="#080912aa";ctx.beginPath();ctx.ellipse(0,0,82,23,0,0,Math.PI*2);ctx.fill();
+  const blade=ctx.createLinearGradient(-4,-130,28,-8);blade.addColorStop(0,"#e8edff");blade.addColorStop(.45,"#9ba8d2");blade.addColorStop(1,"#4b5278");
+  ctx.fillStyle=blade;ctx.beginPath();ctx.moveTo(-10,-12);ctx.lineTo(8,-126);ctx.lineTo(23,-139);ctx.lineTo(22,-113);ctx.lineTo(13,-9);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#d7e1ff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(7,-116);ctx.lineTo(15,-22);ctx.stroke();
+  ctx.fillStyle="#d7a85b";ctx.beginPath();ctx.moveTo(-22,-15);ctx.lineTo(28,-20);ctx.lineTo(34,-8);ctx.lineTo(-24,-4);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#4b2d28";ctx.beginPath();ctx.roundRect(-10,-5,17,45,5);ctx.fill();ctx.restore();
+  // Press M for a small tactical map.
+  if(showMap){const scale=7,mw=W*scale,mh=H*scale,ox=cw-mw-18,oy=18;ctx.fillStyle="#070912dc";ctx.fillRect(ox-7,oy-7,mw+14,mh+14);for(const w of room.walls){ctx.fillStyle="#777186";ctx.fillRect(ox+w.x*scale,oy+w.y*scale,scale,scale);}for(const e of room.enemies)if(e.alive){ctx.fillStyle="#ff6e7d";ctx.fillRect(ox+e.x*scale,oy+e.y*scale,4,4);}for(const p of room.players){ctx.fillStyle=p.color;ctx.fillRect(ox+p.x*scale,oy+p.y*scale,5,5);}ctx.fillStyle="#ffc766";ctx.fillRect(ox+room.exit.x*scale,oy+room.exit.y*scale,5,5);ctx.strokeStyle="#ffffff66";ctx.strokeRect(ox,oy,mw,mh);}
+  // Reticle, vignette, and compact cinematic labels.
+  ctx.textAlign="center";ctx.strokeStyle="#e8e5ffb8";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cw/2-8,ch/2);ctx.lineTo(cw/2-3,ch/2);ctx.moveTo(cw/2+3,ch/2);ctx.lineTo(cw/2+8,ch/2);ctx.moveTo(cw/2,ch/2-8);ctx.lineTo(cw/2,ch/2-3);ctx.moveTo(cw/2,ch/2+3);ctx.lineTo(cw/2,ch/2+8);ctx.stroke();
+  const vignette=ctx.createRadialGradient(cw/2,ch/2,ch*.18,cw/2,ch/2,ch*.72);vignette.addColorStop(0,"#0000");vignette.addColorStop(1,"#03040bb8");ctx.fillStyle=vignette;ctx.fillRect(0,0,cw,ch);
+  ctx.textAlign="left";ctx.fillStyle="#f3e9ffcc";ctx.font="bold 13px ui-monospace,monospace";ctx.fillText("THE SUNLESS KEEP  /  DEPTHS UNKNOWN",18,26);
+  ctx.fillStyle="#ffcf7c";ctx.font="12px ui-monospace,monospace";ctx.fillText("✦ " + room.loot.length + " relics remain",18,ch-18);
+  if(me&&me.hp<=0){ctx.fillStyle="#180d1bd9";ctx.fillRect(0,0,cw,ch);ctx.fillStyle="#ff899a";ctx.font="bold 34px system-ui";ctx.textAlign="center";ctx.fillText("YOU HAVE FALLEN",cw/2,ch/2-10);ctx.fillStyle="#f3e9ff";ctx.font="16px system-ui";ctx.fillText("stay close to your friend and press R to be revived",cw/2,ch/2+24);}
+  if(room.escaped){ctx.fillStyle="#06130ed9";ctx.fillRect(0,0,cw,ch);ctx.fillStyle="#76f2a0";ctx.font="bold 36px system-ui";ctx.textAlign="center";ctx.fillText("ESCAPED TOGETHER",cw/2,ch/2);}
+}
+function frame(){anim++;if(keys.has("arrowleft"))local.angle-=.045;if(keys.has("arrowright"))local.angle+=.045;move();if(room){const partner=room.players.find(p=>p.id!==playerId);if(partner&&me&&me.hp>0&&partner.hp<=0&&Math.hypot(partner.x-local.x,partner.y-local.y)<2)$("reviveBtn").style.borderColor="var(--green)";else $("reviveBtn").style.borderColor="";}draw();loopId=requestAnimationFrame(frame);}
+})();
+</script>
+</body></html>

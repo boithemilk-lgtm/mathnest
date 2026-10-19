@@ -1,0 +1,12 @@
+{
+  "name": "mathnest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MathNest - a math help site with a hidden arcade. Deployable to Wasmer Edge.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/"
+  }
+}

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Vault</title>
+  <meta name="description" content="Games, chat and more.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0d13'/%3E%3Ctext x='16' y='22' font-size='16' fill='%2362e88c' text-anchor='middle' font-family='monospace'%3E67%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/vault.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <span class="vault-logo" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="12" cy="12" r="4"/><path d="M12 10.5v-1M12 14.5v1M10.5 12h-1M14.5 12h-1"/></svg>
+        </span>
+        <div>
+          <h1 class="vault-title">THE VAULT</h1>
+          <p class="vault-tag">unlocked</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a class="exit-link" href="/">← MathNest</a>
+        <div class="user-chip" id="userChip" hidden></div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Vault sections">
+      <button class="tab is-active" role="tab" aria-selected="true" data-tab="games">🎮 Games</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="chat">💬 Chat</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="proxy">🌐 Proxy</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="extras">✨ Extras</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ GAMES ============ -->
+    <section class="panel is-active" data-panel="games" role="tabpanel">
+      <div class="panel-head">
+        <h2>Pick your poison</h2>
+        <p>Every game is built in — no downloads, no flash. Best scores are saved on this device.</p>
+      </div>
+      <div class="game-grid" id="gameGrid"></div>
+    </section>
+
+    <!-- ============ CHAT ============ -->
+    <section class="panel" data-panel="chat" role="tabpanel">
+      <div class="chat-layout" id="chatLoggedOut">
+        <div class="auth-card">
+          <h2>Join the chatroom</h2>
+          <p class="muted">Make an account (username + password) to chat with everyone in the Vault. Accounts live on the server, not this device.</p>
+          <div class="auth-tabs">
+            <button class="auth-tab is-active" data-auth="signup">Sign up</button>
+            <button class="auth-tab" data-auth="login">Log in</button>
+          </div>
+          <form id="authForm" class="auth-form">
+            <label class="field">
+              <span>Username</span>
+              <input id="authUser" type="text" maxlength="20" placeholder="e.g. pixelpanda" autocomplete="username" required>
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input id="authPass" type="password" minlength="6" placeholder="6+ characters" autocomplete="current-password" required>
+            </label>
+            <p class="auth-error" id="authError" role="alert"></p>
+            <button class="btn-primary" type="submit" id="authSubmit">Sign up</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="chat-layout" id="chatLoggedIn" hidden>
+        <div class="chat-main">
+          <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <form class="chat-input" id="chatForm">
+            <input id="chatText" type="text" maxlength="500" placeholder="Say something…" autocomplete="off">
+            <button class="btn-primary" type="submit">Send</button>
+          </form>
+        </div>
+        <aside class="chat-side">
+          <h3>Online now</h3>
+          <ul class="online-list" id="onlineList"></ul>
+          <button class="btn-ghost" id="logoutBtn" type="button">Log out</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ PROXY ============ -->
+    <section class="panel" data-panel="proxy" role="tabpanel">
+      <div class="panel-head">
+        <h2>Built-in proxy</h2>
+        <p>Browse the web through this site — pages are fetched server-side so the destination only ever sees this server. Best for simple, informational sites; complex apps that need logins may not work.</p>
+      </div>
+      <form class="proxy-bar" id="proxyForm">
+        <input id="proxyUrl" type="text" placeholder="https://en.wikipedia.org" spellcheck="false" autocomplete="off">
+        <button class="btn-primary" type="submit">Go</button>
+      </form>
+      <div class="proxy-quick">
+        <span>Quick:</span>
+        <button class="quick-link" data-url="https://en.wikipedia.org/wiki/Main_Page">Wikipedia</button>
+        <button class="quick-link" data-url="https://duckduckgo.com/html/?q=weather">DuckDuckGo</button>
+        <button class="quick-link" data-url="https://example.com">Example.com</button>
+        <button class="quick-link" data-url="http://textfiles.com">Textfiles</button>
+      </div>
+      <div class="proxy-frame-wrap">
+        <iframe id="proxyFrame" class="proxy-frame" sandbox="allow-scripts allow-forms allow-popups" title="Proxied website"></iframe>
+        <div class="proxy-empty" id="proxyEmpty">
+          <p class="big">🌐</p>
+          <p>Enter a URL above to start browsing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EXTRAS ============ -->
+    <section class="panel" data-panel="extras" role="tabpanel">
+      <div class="panel-head">
+        <h2>Fun stuff</h2>
+        <p>Little toys for when you need 30 seconds of chaos between rounds.</p>
+      </div>
+      <div class="extras-grid">
+        <div class="extra-card">
+          <h3>🥁 Drum pad</h3>
+          <p class="muted">Tap the pads or press keys 1–9.</p>
+          <div class="drum-grid" id="drumGrid"></div>
+        </div>
+        <div class="extra-card">
+          <h3>⌨️ Hacker typer</h3>
+          <p class="muted">Click the screen, then mash any keys. Instant hacker.</p>
+          <pre class="typer" id="typer" tabindex="0"></pre>
+          <div class="typer-status" id="typerStatus"></div>
+        </div>
+        <div class="extra-card">
+          <h3>🧠 Fun facts</h3>
+          <p class="muted">Questionable trivia, guaranteed accurate-ish.</p>
+          <div class="fact-card" id="factCard">
+            <p class="fact-text" id="factText"></p>
+            <button class="btn-ghost" id="factBtn" type="button">Another one</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ GAME MODAL ============ -->
+  <div class="game-modal" id="gameModal" hidden>
+    <div class="game-modal-inner">
+      <div class="game-modal-head">
+        <h2 id="gameTitle">Game</h2>
+        <div class="game-stats">
+          <span>Score <strong id="gameScore">0</strong></span>
+          <span>Best <strong id="gameBest">0</strong></span>
+        </div>
+        <div class="game-controls">
+          <button class="btn-ghost" id="gameRestart" type="button">Restart</button>
+          <button class="btn-primary" id="gameClose" type="button">Close ✕</button>
+        </div>
+      </div>
+      <p class="game-help muted" id="gameHelp"></p>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/vault.js"></script>
+</body>
+</html>

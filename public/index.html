@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MathNest — Free Math Help for Students</title>
+  <meta name="description" content="MathNest offers free step-by-step math help: algebra, geometry, calculus, fractions, practice problems and formula references.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d3fa8'/%3E%3Ctext x='16' y='23' font-size='19' fill='white' text-anchor='middle' font-family='Georgia'%3E%CE%A3%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/math.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="MathNest home">
+        <span class="brand-mark" aria-hidden="true">Σ</span>
+        <span class="brand-name">Math<em>Nest</em></span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#topics">Topics</a>
+        <a href="#formulas">Formulas</a>
+        <a href="#practice">Practice</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <p class="hero-kicker">Free · Step-by-step · No sign-up</p>
+        <h1 class="hero-title">Math help that actually <span class="accent">clicks</span>.</h1>
+        <p class="hero-sub">Search hundreds of explained topics, worked examples and practice problems — from fractions to calculus.</p>
+
+        <form class="search" id="searchForm" role="search" autocomplete="off">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="searchInput" placeholder="Search a topic — try &ldquo;quadratic formula&rdquo;" aria-label="Search math topics">
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+        <p class="search-hint" id="searchHint">Popular: fractions · Pythagorean theorem · percentages · slope</p>
+
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </section>
+
+    <section class="section" id="topics">
+      <div class="container">
+        <h2 class="section-title">Browse by topic</h2>
+        <p class="section-sub">Every guide includes a plain-English explanation, worked examples and common mistakes to avoid.</p>
+        <div class="topic-grid" id="topicGrid"></div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="formulas">
+      <div class="container">
+        <h2 class="section-title">Formula reference</h2>
+        <p class="section-sub">The formulas students ask about most, all on one page.</p>
+        <div class="formula-grid">
+          <div class="formula-card"><span class="formula-name">Quadratic formula</span><span class="formula-body">x = (−b ± √(b² − 4ac)) / 2a</span><span class="formula-note">Solves ax² + bx + c = 0</span></div>
+          <div class="formula-card"><span class="formula-name">Pythagorean theorem</span><span class="formula-body">a² + b² = c²</span><span class="formula-note">Right triangles: legs a, b, hypotenuse c</span></div>
+          <div class="formula-card"><span class="formula-name">Slope of a line</span><span class="formula-body">m = (y₂ − y₁) / (x₂ − x₁)</span><span class="formula-note">Rise over run between two points</span></div>
+          <div class="formula-card"><span class="formula-name">Circle area & circumference</span><span class="formula-body">A = πr² &nbsp;·&nbsp; C = 2πr</span><span class="formula-note">r is the radius</span></div>
+          <div class="formula-card"><span class="formula-name">Distance formula</span><span class="formula-body">d = √((x₂ − x₁)² + (y₂ − y₁)²)</span><span class="formula-note">Between two points</span></div>
+          <div class="formula-card"><span class="formula-name">Product rule</span><span class="formula-body">(fg)′ = f′g + fg′</span><span class="formula-note">Derivative of a product</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="practice">
+      <div class="container">
+        <h2 class="section-title">Practice problems</h2>
+        <p class="section-sub">Five quick questions. Instant feedback, no grading required.</p>
+        <div class="quiz" id="quiz"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> MathNest — free math help for every student.</p>
+      <p class="footer-links"><a href="#topics">Topics</a> · <a href="#formulas">Formulas</a> · <a href="#practice">Practice</a></p>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/math.js"></script>
+</body>
+</html>

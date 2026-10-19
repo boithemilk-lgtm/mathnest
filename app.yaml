@@ -1,0 +1,16 @@
+# Wasmer Edge app configuration.
+#
+# BEFORE DEPLOYING:
+#   1. Replace `owner` with your Wasmer username (or org namespace).
+#   2. Rename the app if you like (lowercase letters, numbers and dashes only).
+#
+# The `volumes` section creates a persistent volume mounted at /data.
+# User accounts, sessions and chat messages are stored there, so they
+# survive restarts and redeploys.
+kind: wasmer.io/App.v0
+name: mathnest
+owner: YOUR_WASMER_USERNAME
+package: .
+volumes:
+  - name: data
+    mount: /data

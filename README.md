@@ -25,10 +25,12 @@ and more.
   passwords, 30k iterations), sessions, live messages (2s polling), and an
   "online now" list. Chat renders with `textContent` only — XSS-safe by
   construction.
-- **Built-in proxy** — type any URL and pages are fetched server-side, cleaned
-  (base-tag injection, link rewriting, script-src stripping where possible),
-  and rendered in a sandboxed iframe. Blocks private/internal IPs, 5 MB cap,
-  12 s timeout.
+- **Built-in proxy** — type any URL and pages are fetched server-side,
+  rewritten so navigation stays inside the proxy, and rendered in a sandboxed
+  iframe (CSP-sandboxed, isolated from this app's storage). Private/internal
+  addresses are blocked at the connection level (validated DNS), responses
+  are capped at 5 MB (including decompressed size) and a best-effort 12 s
+  upstream timeout. Best for simple informational sites.
 - **Extras** — drum pad, hacker typer, fun facts, sound effects, best scores.
 
 ## Run locally

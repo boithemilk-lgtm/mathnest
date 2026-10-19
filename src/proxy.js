@@ -357,12 +357,21 @@ export async function proxyRequest(req, res, query) {
   try {
     // Body was read with incremental size + deadline enforcement inside
     // validatedRequest. Some servers ignore accept-encoding: identity — if the
-    // body still arrives compressed, decompress (and re-check the cap).
+    // body still arrives compressed, decompress with a hard output bound so a
+    // small compressed payload can't expand past the cap.
     let buf = upstream.body;
     const enc = (upstream.headers.get("content-encoding") || "").toLowerCase();
     if (enc === "gzip" || enc === "deflate" || enc === "br") {
-      buf = enc === "gzip" ? zlib.gunzipSync(buf) : enc === "deflate" ? zlib.inflateSync(buf) : zlib.brotliDecompressSync(buf);
-      if (buf.length > MAX_BYTES) return sendJson(413, { error: "Response too large" });
+      try {
+        buf = enc === "gzip" ? zlib.gunzipSync(buf, { maxOutputLength: MAX_BYTES })
+          : enc === "deflate" ? zlib.inflateSync(buf, { maxOutputLength: MAX_BYTES })
+          : zlib.brotliDecompressSync(buf, { maxOutputLength: MAX_BYTES });
+      } catch (e) {
+        if (e && (e.code === "ERR_BUFFER_TOO_LARGE" || /too large/i.test(String(e.message)))) {
+          return sendJson(413, { error: "Response too large" });
+        }
+        throw e;
+      }
     }
     if (buf.length > MAX_BYTES) return sendJson(413, { error: "Response too large" });
 

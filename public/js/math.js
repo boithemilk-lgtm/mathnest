@@ -38,7 +38,7 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
   const q = input.value.trim();
   if (q === "67") {
-    window.location.href = "/vault.html";
+    window.location.href = "vault.html";
     return;
   }
   renderSearch(q);

@@ -43,10 +43,10 @@ No build step, no dependencies. Node 18+.
 ## Deploy to Wasmer
 
 This app targets [Wasmer Edge](https://wasmer.io) (Node.js apps are
-auto-detected from `package.json` — no `wasmer.toml` needed). It is configured
-for Wasmer but was built and tested locally / on a static host — the Wasmer
-deployment itself is yours to run, so treat the steps below as the tested
-path and report any Edge-specific quirks.
+auto-detected from `package.json` — no `wasmer.toml` needed). It is
+**Wasmer-configured, not Wasmer-tested**: it was built and verified locally
+and on a static host, and the Wasmer deployment itself is yours to run.
+Report any Edge-specific quirks you hit.
 
 ### Option A: GitHub connection (recommended)
 1. Push this repo to GitHub.

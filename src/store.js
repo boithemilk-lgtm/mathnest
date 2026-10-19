@@ -41,34 +41,52 @@ function emptyDb() {
 let cache = null;
 let cachedMtime = 0;
 
-// Best-effort cross-process lock. Edge apps can run several instances against
-// the same volume, so every read-modify-write mutation runs inside this lock
-// to avoid lost updates. If the lock can't be acquired quickly we proceed
-// anyway — availability beats strict consistency for a hobby chat app.
+// Cross-process lock. Edge apps can run several instances against the same
+// volume, so every read-modify-write mutation runs inside this lock to avoid
+// lost updates. The lock FAILS CLOSED: if it cannot be acquired, the mutation
+// is refused with a busy error — a writer never proceeds without the lock.
+// A leftover lock is only cleared when the holder's PID is provably not
+// running on this machine (never on age alone). Known limitation: on a
+// multi-node cluster sharing one volume, PID checks can't see other nodes.
 const LOCK_FILE = DB_FILE + ".lock";
-const LOCK_STALE_MS = 5000;
-const LOCK_WAIT_MS = 2000;
+const LOCK_WAIT_MS = 5000;
+
+function processAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e && e.code === "EPERM"; // exists, just owned by another user
+  }
+}
 
 export function withLock(fn) {
+  // The data directory must exist before the lock file can be created.
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (_) {}
   let acquired = false;
   const start = Date.now();
   while (Date.now() - start < LOCK_WAIT_MS) {
     try {
       const fd = fs.openSync(LOCK_FILE, "wx");
+      fs.writeSync(fd, JSON.stringify({ pid: process.pid, ts: Date.now() }));
       fs.closeSync(fd);
       acquired = true;
       break;
     } catch (e) {
-      // Someone else holds it. Clear the lock if it looks stale (holder died).
+      // Someone else holds it. Clear it only if the holder is provably dead.
       try {
-        const st = fs.statSync(LOCK_FILE);
-        if (Date.now() - st.mtimeMs > LOCK_STALE_MS) {
+        const holder = JSON.parse(fs.readFileSync(LOCK_FILE, "utf8"));
+        if (holder && holder.pid && !processAlive(holder.pid)) {
           try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
+          continue;
         }
-      } catch (_) { /* lock vanished — retry immediately */ }
+      } catch (_) { /* unreadable — keep waiting, never break it blind */ }
       const until = Date.now() + 3 + Math.floor(Math.random() * 8);
       while (Date.now() < until) { /* brief spin */ }
     }
+  }
+  if (!acquired) {
+    return { error: 503, message: "Server is busy — try again in a moment" };
   }
   // Always re-read from disk inside the lock: mtime-based cache checks can
   // miss a write that landed in the same clock tick on coarse-granularity
@@ -77,9 +95,7 @@ export function withLock(fn) {
   try {
     return fn();
   } finally {
-    if (acquired) {
-      try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
-    }
+    try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
   }
 }
 

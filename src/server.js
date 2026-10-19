@@ -166,7 +166,7 @@ async function handleApi(req, res, url) {
   }
 
   if (method === "GET" && pathname === "/api/parse-target") {
-    const parsed = parseTarget(url.searchParams.get("url"));
+    const parsed = await parseTarget(url.searchParams.get("url"));
     return sendJson(res, 200, parsed);
   }
 

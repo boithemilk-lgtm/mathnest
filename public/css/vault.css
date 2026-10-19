@@ -68,7 +68,7 @@ main, .topbar { position: relative; z-index: 1; }
 }
 .topbar-inner {
   max-width: 1180px; margin-inline: auto;
-  padding: var(--space-4) clamp(1rem, 4vw, 2rem));
+  padding: var(--space-4) clamp(1rem, 4vw, 2rem);
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
 }
 .topbar-left { display: flex; align-items: center; gap: var(--space-3); }

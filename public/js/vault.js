@@ -278,6 +278,7 @@ function startGame(meta) {
       window.vaultSubmitScore?.(meta.id, finalScore);
     },
   });
+  window.vaultCurrentGame = currentGame; // debug/testing hook (client-side games are inherently cheatable)
 }
 
 function closeGame() {
@@ -609,15 +610,29 @@ function appendMessage(msg) {
   messagesEl.appendChild(div);
 }
 
+let pollChatBusy = false; // in-flight guard: manual + interval polls can race and double-render
+let pollCount = 0;
 async function pollChat() {
+  if (pollChatBusy) return;
+  pollChatBusy = true;
   try {
-    const data = await getMessages(lastMessageId);
+    pollCount++;
+    // every 10th poll (~20s): full refresh reconciles reactions/deletes on older messages
+    const fullRefresh = pollCount % 10 === 0;
+    const since = fullRefresh ? 0 : lastMessageId;
+    const data = await getMessages(since);
     if (!chatRunning) return;
     userMap = Object.assign(userMap, data.users || {});
     myRole = store.get("vault_role", "user");
-    for (const msg of data.messages || []) {
-      appendMessage(msg);
-      lastMessageId = Math.max(lastMessageId, msg.id);
+    if (dmWith) {
+      // DM drawer owns the message view; just advance the cursor
+      for (const msg of data.messages || []) lastMessageId = Math.max(lastMessageId, msg.id);
+    } else {
+      if (fullRefresh && lastMessageId) messagesEl.innerHTML = "";
+      for (const msg of data.messages || []) {
+        appendMessage(msg);
+        lastMessageId = Math.max(lastMessageId, msg.id);
+      }
     }
     // cap DOM length
     while (messagesEl.children.length > 300) messagesEl.removeChild(messagesEl.firstChild);
@@ -658,6 +673,8 @@ async function pollChat() {
     if (dmWith) pollDM();
   } catch (e) {
     if (String(e.message).includes("Log in")) { stopChat(); refreshAuthUI(); }
+  } finally {
+    pollChatBusy = false;
   }
 }
 
@@ -866,7 +883,7 @@ window.addEventListener("keydown", (e) => {
     else lastEscTime = now;
     return;
   }
-  if (!modal.hidden) { closeGame(); return; } // first Esc closes the game
+  if (!modal.hidden) { lastEscTime = now; closeGame(); return; } // first Esc closes the game (still counts toward the double-tap)
   if (now - lastEscTime < 700) enterPanic(); // double-tap = panic
   else lastEscTime = now;
 });

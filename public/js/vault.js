@@ -680,9 +680,13 @@ async function pollChat() {
 
 // ---------- DM drawer ----------
 
+let dmViewGen = 0; // bumped on every view switch: stale in-flight DM responses get discarded
+let pollDMBusy = false;
+
 function openDM(username) {
   if (username === store.get("vault_username", "")) return;
   dmWith = username;
+  dmViewGen++;
   lastDmId = 0;
   dmBar.hidden = false;
   dmTitle.textContent = "✉ DM with " + username;
@@ -693,6 +697,7 @@ function openDM(username) {
 
 dmBack.addEventListener("click", () => {
   dmWith = null;
+  dmViewGen++; // invalidate any in-flight DM poll
   dmBar.hidden = true;
   chatText.placeholder = "Say something…";
   messagesEl.innerHTML = "";
@@ -705,10 +710,16 @@ dmBack.addEventListener("click", () => {
 });
 
 async function pollDM() {
-  if (!dmWith) return;
+  if (!dmWith || pollDMBusy) return;
+  pollDMBusy = true;
+  const thread = dmWith;
+  const gen = dmViewGen;
   try {
-    const data = await getDMs(dmWith, lastDmId);
+    const data = await getDMs(thread, lastDmId);
+    // view changed while the request was in flight — drop the response
+    if (!chatRunning || dmWith !== thread || gen !== dmViewGen) return;
     for (const msg of (data.messages || [])) {
+      if (msg.id <= lastDmId) continue; // dedupe by id (guards against cursor races)
       lastDmId = Math.max(lastDmId, msg.id);
       const div = document.createElement("div");
       div.className = "chat-msg dm" + (msg.from === store.get("vault_username", "") ? " mine" : "");
@@ -730,6 +741,8 @@ async function pollDM() {
     while (messagesEl.children.length > 300) messagesEl.removeChild(messagesEl.firstChild);
   } catch (e) {
     if (String(e.message).includes("Log in")) { stopChat(); refreshAuthUI(); }
+  } finally {
+    pollDMBusy = false;
   }
 }
 
@@ -750,6 +763,7 @@ function stopChat() {
   chatRunning = false;
   if (chatTimer) { clearInterval(chatTimer); chatTimer = null; }
   dmWith = null;
+  dmViewGen++; // invalidate any in-flight DM poll
   dmBar.hidden = true;
 }
 

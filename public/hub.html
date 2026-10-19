@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MathNest Hub</title>
+  <meta name="description" content="Your MathNest dashboard, profile, community, and AI helper.">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/hub.css">
+  <script type="module" src="js/hub.js"></script>
+</head>
+<body>
+  <div class="ambient"></div>
+  <header class="header">
+    <a class="brand" href="vault.html"><span class="brand-icon">✳</span><span><b>MATHNEST</b><small>YOUR SPACE</small></span></a>
+    <nav><a href="vault.html">🎮 Vault</a><a href="dungeon.html">🗡️ Dungeon</a><a href="index.html">← MathNest</a></nav>
+    <div id="accountPill" class="account-pill">guest mode</div>
+  </header>
+  <main class="wrap">
+    <section class="hero">
+      <div><p class="eyebrow">YOUR PERSONAL SPACE</p><h1>the nest<span>.</span></h1><p class="sub">your shortcuts, your profile, your people, and a little AI magic.</p></div>
+      <div class="hero-orb" aria-hidden="true">✦</div>
+    </section>
+    <div class="layout">
+      <aside class="sidebar">
+        <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
+        <button class="nav-item" data-view="profile">◉ <span>Profile</span></button>
+        <button class="nav-item" data-view="community">✳ <span>Community</span></button>
+        <button class="nav-item" data-view="ai">✧ <span>MathNest AI</span><i>beta</i></button>
+        <div class="side-note"><span class="status-dot"></span><div><b>your nest, your rules</b><small>save your favorites and make it yours.</small></div></div>
+      </aside>
+      <div class="content">
+        <section class="view active" id="view-dashboard">
+          <div class="section-title"><div><p class="eyebrow">OVERVIEW</p><h2>Welcome back<span id="welcomeName">, explorer</span></h2></div><span class="date-chip" id="todayLabel"></span></div>
+          <div class="stat-grid">
+            <article class="stat-card"><span class="stat-icon violet">✳</span><small>YOUR PROFILE</small><strong id="dashProfile">set it up</strong><p>make your corner yours</p></article>
+            <article class="stat-card"><span class="stat-icon green">☻</span><small>COMMUNITY</small><strong>say hello</strong><p>share what you're building</p></article>
+            <article class="stat-card"><span class="stat-icon amber">✧</span><small>AI ASSISTANT</small><strong>ask anything</strong><p>brainstorm, learn, and code</p></article>
+          </div>
+          <div class="section-title small-title"><div><p class="eyebrow">QUICK LAUNCH</p><h2>your shortcuts</h2></div><button class="soft-button" id="addShortcut">＋ add link</button></div>
+          <div class="shortcut-grid" id="shortcutGrid"></div>
+          <div class="section-title small-title"><div><p class="eyebrow">RECENTLY ADDED</p><h2>explore MathNest</h2></div></div>
+          <div class="explore-grid">
+            <a class="explore-card purple" href="vault.html"><span>🎮</span><div><b>The Vault</b><small>games, chat, and extras</small></div><i>↗</i></a>
+            <a class="explore-card green" href="dungeon.html"><span>🗡️</span><div><b>Dungeon co-op</b><small>team up and explore</small></div><i>↗</i></a>
+            <button class="explore-card amber" data-go="community"><span>✳</span><div><b>Community</b><small>meet the people here</small></div><i>↗</i></button>
+            <button class="explore-card blue" data-go="ai"><span>✧</span><div><b>MathNest AI</b><small>your built-in assistant</small></div><i>↗</i></button>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile">
+          <div class="section-title"><div><p class="eyebrow">MAKE IT YOURS</p><h2>your profile</h2><p class="section-sub">Set your display name, avatar, and short bio.</p></div></div>
+          <div class="profile-layout">
+            <div class="profile-preview"><div class="big-avatar" id="previewAvatar">🎮</div><h3 id="previewName">guest explorer</h3><p id="previewBio">no bio yet — add a little about yourself.</p><span class="member-tag">✦ MATHNEST MEMBER</span></div>
+            <form class="panel-card profile-form" id="profileForm">
+              <label>display name<input id="displayName" maxlength="24" placeholder="what should people call you?"></label>
+              <label>about you<textarea id="bio" maxlength="160" rows="3" placeholder="games you like, projects you're building…"></textarea><small><span id="bioCount">0</span>/160</small></label>
+              <label>choose an avatar</label><div class="avatar-picker" id="avatarPicker"></div>
+              <p class="form-message" id="profileMessage" role="status"></p>
+              <button class="primary-button" type="submit">save profile <span>→</span></button>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="view-community">
+          <div class="section-title"><div><p class="eyebrow">THE PEOPLE MAKE THE PLACE</p><h2>community board</h2><p class="section-sub">Share an update, show off a project, or say what's up.</p></div><button class="soft-button" id="refreshFeed">↻ refresh</button></div>
+          <form class="composer panel-card" id="postForm"><div class="composer-avatar" id="composerAvatar">🎮</div><div class="composer-main"><textarea id="postText" maxlength="280" rows="3" placeholder="what's happening? (280 characters max)"></textarea><div class="composer-foot"><span id="postCount">0/280</span><button class="primary-button" type="submit">post to community ↗</button></div></div></form>
+          <p class="form-message" id="feedMessage" role="status"></p>
+          <div class="feed" id="feed"><div class="empty-state">loading the community…</div></div>
+        </section>
+
+        <section class="view" id="view-ai">
+          <div class="section-title"><div><p class="eyebrow">YOUR CREATIVE SIDEKICK</p><h2>MathNest AI<span class="beta-pill">BETA</span></h2><p class="section-sub">Ask questions, brainstorm ideas, or get help with code.</p></div><button class="soft-button" id="clearAi">clear chat</button></div>
+          <div class="ai-shell panel-card">
+            <div class="ai-top"><div class="ai-logo">✧</div><div><b>Nest AI</b><small><span class="status-dot"></span> ready when configured</small></div><span class="model-label">AI ASSISTANT</span></div>
+            <div class="ai-messages" id="aiMessages"><div class="ai-welcome"><div class="welcome-spark">✧</div><h3>what are we working on?</h3><p>ask me to explain something, debug code, plan a project, or help you get unstuck.</p><div class="prompt-chips"><button data-prompt="Help me plan a cool website project.">💻 website ideas</button><button data-prompt="Explain a difficult topic in simple steps.">🧠 explain a topic</button><button data-prompt="Help me debug this code: ">🛠️ debug code</button></div></div></div>
+            <form class="ai-form" id="aiForm"><textarea id="aiInput" rows="1" maxlength="3000" placeholder="message MathNest AI…"></textarea><button class="send-button" type="submit" aria-label="Send message">↑</button></form>
+            <p class="ai-disclaimer">AI can make mistakes. Don't share passwords or private information.</p>
+          </div>
+          <p class="setup-note" id="aiSetupNote" hidden>the AI provider isn't configured yet. add <code>OPENROUTER_API_KEY</code> to your Wasmer app's environment variables. the key stays on the server.</p>
+        </section>
+      </div>
+    </div>
+    <footer>MathNest <span>·</span> built for curiosity, made for fun.</footer>
+  </main>
+  <dialog id="shortcutDialog"><form method="dialog" id="shortcutForm"><div class="dialog-head"><h3>add a shortcut</h3><button class="icon-button" value="cancel" aria-label="close">✕</button></div><label>name<input id="shortcutName" maxlength="24" placeholder="my project" required></label><label>link<input id="shortcutUrl" type="url" placeholder="https://example.com" required></label><div class="dialog-actions"><button class="soft-button" value="cancel">cancel</button><button class="primary-button" id="saveShortcut" value="default">add shortcut →</button></div></form></dialog>
+</body>
+</html>

@@ -41,6 +41,48 @@ function emptyDb() {
 let cache = null;
 let cachedMtime = 0;
 
+// Best-effort cross-process lock. Edge apps can run several instances against
+// the same volume, so every read-modify-write mutation runs inside this lock
+// to avoid lost updates. If the lock can't be acquired quickly we proceed
+// anyway — availability beats strict consistency for a hobby chat app.
+const LOCK_FILE = DB_FILE + ".lock";
+const LOCK_STALE_MS = 5000;
+const LOCK_WAIT_MS = 2000;
+
+export function withLock(fn) {
+  let acquired = false;
+  const start = Date.now();
+  while (Date.now() - start < LOCK_WAIT_MS) {
+    try {
+      const fd = fs.openSync(LOCK_FILE, "wx");
+      fs.closeSync(fd);
+      acquired = true;
+      break;
+    } catch (e) {
+      // Someone else holds it. Clear the lock if it looks stale (holder died).
+      try {
+        const st = fs.statSync(LOCK_FILE);
+        if (Date.now() - st.mtimeMs > LOCK_STALE_MS) {
+          try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
+        }
+      } catch (_) { /* lock vanished — retry immediately */ }
+      const until = Date.now() + 3 + Math.floor(Math.random() * 8);
+      while (Date.now() < until) { /* brief spin */ }
+    }
+  }
+  // Always re-read from disk inside the lock: mtime-based cache checks can
+  // miss a write that landed in the same clock tick on coarse-granularity
+  // filesystems (tmpfs, some volume mounts).
+  cache = null;
+  try {
+    return fn();
+  } finally {
+    if (acquired) {
+      try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
+    }
+  }
+}
+
 export function getDb() {
   try {
     const st = fs.statSync(DB_FILE);

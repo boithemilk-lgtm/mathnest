@@ -1,6 +1,6 @@
 // Accounts, sessions and chat logic.
 
-import { getDb, saveDb } from "./store.js";
+import { getDb, saveDb, withLock } from "./store.js";
 import { pbkdf2, toHex, randomHex, utf8 } from "./sha256.js";
 
 const PBKDF2_ITERATIONS = 30000; // kept moderate: QuickJS on Edge is slower than V8
@@ -21,35 +21,45 @@ export function signup(username, password) {
   if (password.length < 6 || password.length > 100) {
     return { error: 400, message: "Password must be 6-100 characters" };
   }
-  const db = getDb();
-  const key = username.toLowerCase();
-  if (db.users[key]) return { error: 409, message: "That username is taken" };
+  // Hash BEFORE taking the lock — PBKDF2 is slow and holding the lock during
+  // it makes other instances think the lock is stale and break it.
   const salt = randomHex(16);
-  db.users[key] = {
-    username,
-    salt,
-    hash: hashPassword(password, salt),
-    created: Date.now(),
-  };
-  const token = createSession(db, key);
-  saveDb(db);
-  return { token, username };
+  const hash = hashPassword(password, salt);
+  return withLock(() => {
+    const db = getDb();
+    const key = username.toLowerCase();
+    if (db.users[key]) return { error: 409, message: "That username is taken" };
+    db.users[key] = {
+      username,
+      salt,
+      hash,
+      created: Date.now(),
+    };
+    const token = createSession(db, key);
+    saveDb(db);
+    return { token, username };
+  });
 }
 
 export function login(username, password) {
   const key = String(username || "").trim().toLowerCase();
-  const db = getDb();
-  const user = db.users[key];
-  if (!user) return { error: 401, message: "Wrong username or password" };
-  const hash = hashPassword(String(password || ""), user.salt);
-  // constant-time-ish compare
-  if (hash.length !== user.hash.length) return { error: 401, message: "Wrong username or password" };
-  let diff = 0;
-  for (let i = 0; i < hash.length; i++) diff |= hash.charCodeAt(i) ^ user.hash.charCodeAt(i);
-  if (diff !== 0) return { error: 401, message: "Wrong username or password" };
-  const token = createSession(db, key);
-  saveDb(db);
-  return { token, username: user.username };
+  // Hash outside the lock (see signup note).
+  const user0 = getDb().users[key];
+  if (!user0) return { error: 401, message: "Wrong username or password" };
+  const hash = hashPassword(String(password || ""), user0.salt);
+  return withLock(() => {
+    const db = getDb();
+    const user = db.users[key];
+    if (!user) return { error: 401, message: "Wrong username or password" };
+    // constant-time-ish compare
+    if (hash.length !== user.hash.length) return { error: 401, message: "Wrong username or password" };
+    let diff = 0;
+    for (let i = 0; i < hash.length; i++) diff |= hash.charCodeAt(i) ^ user.hash.charCodeAt(i);
+    if (diff !== 0) return { error: 401, message: "Wrong username or password" };
+    const token = createSession(db, key);
+    saveDb(db);
+    return { token, username: user.username };
+  });
 }
 
 function createSession(db, key) {
@@ -64,12 +74,14 @@ function createSession(db, key) {
 }
 
 export function logout(token) {
-  const db = getDb();
-  if (db.sessions[token]) {
-    delete db.sessions[token];
-    saveDb(db);
-  }
-  return { ok: true };
+  return withLock(() => {
+    const db = getDb();
+    if (db.sessions[token]) {
+      delete db.sessions[token];
+      saveDb(db);
+    }
+    return { ok: true };
+  });
 }
 
 export function userForToken(token) {
@@ -83,15 +95,16 @@ export function userForToken(token) {
 }
 
 export function touchPresence(token, userKey) {
-  const db = getDb();
-  db.presence[userKey] = Date.now();
-  // prune stale presence entries while we're here
-  const cutoff = Date.now() - 5 * 60 * 1000;
-  let dirty = false;
-  for (const u of Object.keys(db.presence)) {
-    if (db.presence[u] < cutoff) { delete db.presence[u]; dirty = true; }
-  }
-  saveDb(db);
+  return withLock(() => {
+    const db = getDb();
+    db.presence[userKey] = Date.now();
+    // prune stale presence entries while we're here
+    const cutoff = Date.now() - 5 * 60 * 1000;
+    for (const u of Object.keys(db.presence)) {
+      if (db.presence[u] < cutoff) delete db.presence[u];
+    }
+    saveDb(db);
+  });
 }
 
 export function onlineUsers() {
@@ -113,15 +126,17 @@ export function postMessage(user, text) {
   text = String(text || "").replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, "").trim();
   if (!text) return { error: 400, message: "Message can't be empty" };
   if (text.length > 500) text = text.slice(0, 500);
-  const db = getDb();
-  const msg = { id: db.nextId++, user: user.username, text, ts: Date.now() };
-  db.messages.push(msg);
-  if (db.messages.length > MAX_MESSAGES) {
-    db.messages = db.messages.slice(-MAX_MESSAGES);
-  }
-  db.presence[user.key] = Date.now();
-  saveDb(db);
-  return { message: msg };
+  return withLock(() => {
+    const db = getDb();
+    const msg = { id: db.nextId++, user: user.username, text, ts: Date.now() };
+    db.messages.push(msg);
+    if (db.messages.length > MAX_MESSAGES) {
+      db.messages = db.messages.slice(-MAX_MESSAGES);
+    }
+    db.presence[user.key] = Date.now();
+    saveDb(db);
+    return { message: msg };
+  });
 }
 
 export function messagesAfter(afterId) {

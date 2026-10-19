@@ -101,11 +101,14 @@ function fetchNode(u, init) {
   });
 }
 
-function proxiedUrl(absoluteUrl) {
-  return "/api/proxy?url=" + encodeURIComponent(absoluteUrl);
+function proxiedUrl(absoluteUrl, origin) {
+  // Origin-absolute (not path-absolute): the page keeps a <base> tag pointing
+  // at the destination, so a plain "/api/proxy?..." href would wrongly resolve
+  // against the destination host. Building the full origin fixes that.
+  return origin + "/api/proxy?url=" + encodeURIComponent(absoluteUrl);
 }
 
-export function rewriteHtml(html, baseUrl) {
+export function rewriteHtml(html, baseUrl, origin) {
   const base = new URL(baseUrl);
   // Resolve a URL found in an attribute against the page we're rewriting.
   const resolve = (val) => {
@@ -130,7 +133,7 @@ export function rewriteHtml(html, baseUrl) {
     if (/^(#|javascript:|mailto:|tel:|data:)/i.test(val.trim())) return m;
     const abs = resolve(val);
     if (!abs) return m;
-    const newAttrs = attrs.replace(hrefMatch[0], ` href="${proxiedUrl(abs)}"`);
+    const newAttrs = attrs.replace(hrefMatch[0], ` href="${proxiedUrl(abs, origin)}"`);
     return `<a${newAttrs}>`;
   });
 
@@ -139,7 +142,7 @@ export function rewriteHtml(html, baseUrl) {
     const abs = resolve(val);
     if (!abs) return m;
     const quote = dq !== undefined ? '"' : "'";
-    return ` action=${quote}${proxiedUrl(abs)}${quote}`;
+    return ` action=${quote}${proxiedUrl(abs, origin)}${quote}`;
   });
 
   out = out.replace(/<iframe([^>]*)>/gi, (m, attrs) => {
@@ -148,7 +151,7 @@ export function rewriteHtml(html, baseUrl) {
     const val = srcMatch[2] !== undefined ? srcMatch[2] : srcMatch[3];
     const abs = resolve(val);
     if (!abs) return m;
-    return `<iframe${attrs.replace(srcMatch[0], ` src="${proxiedUrl(abs)}"`)}>`;
+    return `<iframe${attrs.replace(srcMatch[0], ` src="${proxiedUrl(abs, origin)}"`)}>`;
   });
 
   // 3. Neutralize frame-busting / X-Frame issues are handled by headers; also
@@ -169,11 +172,22 @@ export function rewriteHtml(html, baseUrl) {
 }
 
 export async function proxyRequest(req, res, query) {
+  // The origin this proxy was reached through — used to build absolute links
+  // back into the proxy (they must survive the destination <base> tag).
+  const fwdProto = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
+  const fwdHost = String(req.headers["x-forwarded-host"] || req.headers.host || "");
+  const origin = (fwdProto || "http") + "://" + fwdHost;
+  // Every proxied response carries a CSP sandbox: even if someone opens
+  // /api/proxy directly in a browser tab, the returned document gets an opaque
+  // origin and cannot touch this app's storage or cookies.
+  const CSP = "sandbox allow-scripts allow-forms allow-popups";
+
   const sendJson = (status, obj) => {
     res.writeHead(status, {
       "content-type": "application/json",
       "cache-control": "no-store",
       "access-control-allow-origin": "*",
+      "content-security-policy": CSP,
     });
     res.end(JSON.stringify(obj));
   };
@@ -211,11 +225,12 @@ export async function proxyRequest(req, res, query) {
   try {
     if (contentType.includes("text/html") || contentType.includes("application/xhtml")) {
       const text = await upstream.text();
-      const rewritten = rewriteHtml(text, finalUrl);
+      const rewritten = rewriteHtml(text, finalUrl, origin);
       res.writeHead(200, {
         "content-type": "text/html; charset=utf-8",
         "cache-control": "no-store",
         "x-proxy-final-url": finalUrl.slice(0, 500),
+        "content-security-policy": CSP,
       });
       res.end(rewritten);
       return;
@@ -228,6 +243,7 @@ export async function proxyRequest(req, res, query) {
       "content-type": upstream.headers.get("content-type") || "application/octet-stream",
       "cache-control": "no-store",
       "x-proxy-final-url": finalUrl.slice(0, 500),
+      "content-security-policy": CSP,
     });
     res.end(Buffer.from(buf));
   } catch (e) {

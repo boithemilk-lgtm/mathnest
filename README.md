@@ -43,7 +43,10 @@ No build step, no dependencies. Node 18+.
 ## Deploy to Wasmer
 
 This app targets [Wasmer Edge](https://wasmer.io) (Node.js apps are
-auto-detected from `package.json` — no `wasmer.toml` needed).
+auto-detected from `package.json` — no `wasmer.toml` needed). It is configured
+for Wasmer but was built and tested locally / on a static host — the Wasmer
+deployment itself is yours to run, so treat the steps below as the tested
+path and report any Edge-specific quirks.
 
 ### Option A: GitHub connection (recommended)
 1. Push this repo to GitHub.
@@ -74,11 +77,13 @@ The `data` volume is required — it persists the JSON database (accounts,
 chat messages) across redeploys. **Note:** removing or renaming the volume in
 `app.yaml` deletes that data.
 
-### GitHub Actions (optional)
-A deploy workflow is included at `.github/workflows/deploy.yml`. To use it:
-1. `wasmer token create` (or dashboard → Access Tokens) 
+### GitHub Actions (optional, manual)
+A deploy workflow is included at `.github/workflows/deploy.yml` — it only
+runs when triggered manually from the Actions tab (the dashboard Git
+connection is the recommended path). To use it:
+1. Create a Wasmer access token at https://wasmer.io/settings/access-tokens
 2. Add it as a repository secret named `WASMER_TOKEN`
-3. Push to `main` — the workflow builds remotely and deploys.
+3. Actions tab → "Deploy to Wasmer Edge (manual)" → Run workflow
 
 ## Project structure
 

@@ -11,9 +11,10 @@
 //   - Heavy JavaScript apps that fetch APIs with relative URLs may partially break.
 //   - Intended for simple browsing of informational sites.
 
-import { createRequire } from "node:module";
 import dns from "node:dns";
-const require = createRequire(import.meta.url);
+import http from "node:http";
+import https from "node:https";
+import zlib from "node:zlib";
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB cap per response (all content types)
 const MAX_REDIRECTS = 5;
@@ -123,17 +124,80 @@ export async function parseTarget(rawUrl) {
   return { url: u };
 }
 
+// Validated transport: performs the request over node:http/https with a
+// custom DNS `lookup` that checks every resolved address and pins the
+// connection to a validated one. This enforces the private-address policy at
+// CONNECTION time (no check-then-fetch rebinding gap) while preserving the
+// destination's Host header and TLS SNI. A single absolute deadline covers
+// connect + body read, and the 5 MB cap is enforced incrementally (the
+// request is destroyed as soon as the cap is crossed, not after buffering).
+function validatedRequest(destUrl, init, deadlineMs) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(destUrl);
+    const mod = u.protocol === "https:" ? https : http;
+    const opts = {
+      method: init.method || "GET",
+      headers: { ...init.headers, "accept-encoding": "identity" },
+      lookup: (hostname, dnsOpts, callback) => {
+        dns.promises.lookup(hostname, { all: true }).then((addrs) => {
+          const bad = addrs.find((a) => isPrivateAddress(a.address));
+          if (bad) {
+            const e = new Error("Blocked: that host is not allowed");
+            e.code = "EBLOCKED";
+            return callback(e);
+          }
+          // Node >= 20 (autoSelectFamily) asks with { all: true } and expects an
+          // array; older call sites expect (address, family).
+          if (dnsOpts && dnsOpts.all) {
+            return callback(null, addrs.map((a) => ({ address: a.address, family: a.family })));
+          }
+          const pick = dnsOpts && dnsOpts.family ? addrs.find((a) => a.family === dnsOpts.family) || addrs[0] : addrs[0];
+          callback(null, pick.address, pick.family);
+        }).catch((err) => callback(err));
+      },
+    };
+    let settled = false;
+    let req;
+    const fail = (err) => { if (!settled) { settled = true; try { req.destroy(); } catch (_) {} reject(err); } };
+    const timer = setTimeout(() => fail(new Error("Request timed out")), Math.max(1, deadlineMs - Date.now()));
+    req = mod.request(u, opts, (res) => {
+      const chunks = [];
+      let size = 0;
+      let tooBig = false;
+      res.on("data", (c) => {
+        if (tooBig) return;
+        size += c.length;
+        if (size > MAX_BYTES) {
+          tooBig = true;
+          return fail(new Error("Response too large"));
+        }
+        chunks.push(c);
+      });
+      res.on("aborted", () => fail(new Error("Connection aborted")));
+      res.on("end", () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve({
+          status: res.statusCode,
+          headers: { get: (name) => res.headers[String(name).toLowerCase()] || null },
+          body: Buffer.concat(chunks),
+        });
+      });
+    });
+    req.on("error", (e) => fail(e));
+    if (init.body) req.write(init.body);
+    req.end();
+  });
+}
+
 async function fetchWithRedirectChecks(u, init) {
+  const deadline = Date.now() + REQUEST_TIMEOUT_MS; // one deadline for ALL hops
   let current = u;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     const check = await parseTarget(current.href);
     if (check.error) throw new Error(check.error);
-    let res;
-    if (typeof globalThis.fetch === "function") {
-      res = await fetch(current.href, init);
-    } else {
-      res = await fetchNode(current, init); // fallback for runtimes without fetch
-    }
+    const res = await validatedRequest(current.href, init, deadline);
     if ([301, 302, 303, 307, 308].includes(res.status) && res.headers.get("location")) {
       const next = new URL(res.headers.get("location"), current.href);
       current = next;
@@ -142,35 +206,6 @@ async function fetchWithRedirectChecks(u, init) {
     return { res, finalUrl: current.href };
   }
   throw new Error("Too many redirects");
-}
-
-function fetchNode(u, init) {
-  // Minimal https fallback using node:https when global fetch is missing.
-  const https = require("node:https");
-  const http = require("node:http");
-  const mod = u.protocol === "https:" ? https : http;
-  return new Promise((resolve, reject) => {
-    const req = mod.request(u, { method: init.method || "GET", timeout: REQUEST_TIMEOUT_MS }, (res) => {
-      // wrap in a fetch-like Response subset
-      const chunks = [];
-      res.on("data", (c) => chunks.push(c));
-      res.on("end", () => {
-        const body = Buffer.concat(chunks);
-        resolve({
-          status: res.statusCode,
-          headers: {
-            get: (name) => res.headers[String(name).toLowerCase()] || null,
-          },
-          arrayBuffer: async () => body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength),
-          text: async () => body.toString("utf8"),
-        });
-      });
-    });
-    req.on("timeout", () => { req.destroy(); reject(new Error("Request timed out")); });
-    req.on("error", reject);
-    if (init.body) req.write(init.body);
-    req.end();
-  });
 }
 
 // Navigation (anchors, forms, iframes) is rewritten to "?url=..." — a link
@@ -292,7 +327,9 @@ export async function proxyRequest(req, res, query) {
   const parsed = await parseTarget(targetUrl);
   if (parsed.error) return sendJson(400, { error: parsed.error });
 
-  const headersToForward = {};
+  const headersToForward = {
+    "user-agent": "MathNestProxy/1.0 (personal educational project; respects robots)",
+  };
   if (target && /^https:/i.test(parsed.url.href)) headersToForward["accept-language"] = "en-US,en;q=0.9";
 
   let body = null;
@@ -302,29 +339,32 @@ export async function proxyRequest(req, res, query) {
 
   let result;
   try {
-    result = await Promise.race([
-      fetchWithRedirectChecks(parsed.url, {
-        method: req.method === "HEAD" ? "GET" : req.method,
-        redirect: "manual",
-        headers: headersToForward,
-        body,
-      }),
-      new Promise((_, rej) => setTimeout(() => rej(new Error("Request timed out")), REQUEST_TIMEOUT_MS)),
-    ]);
+    result = await fetchWithRedirectChecks(parsed.url, {
+      method: req.method === "HEAD" ? "GET" : req.method,
+      headers: headersToForward,
+      body,
+    });
   } catch (e) {
-    return sendJson(502, { error: "Could not fetch that URL: " + (e && e.message ? e.message : "network error") });
+    const msg = String((e && e.message) || "network error");
+    if (/too large/i.test(msg)) return sendJson(413, { error: "Response too large" });
+    if (/timed out/i.test(msg)) return sendJson(504, { error: "Request timed out" });
+    return sendJson(502, { error: "Could not fetch that URL: " + msg });
   }
 
   const { res: upstream, finalUrl } = result;
   const contentType = (upstream.headers.get("content-type") || "").toLowerCase();
 
   try {
-    // Read the full body (bounded by size + time) before deciding how to serve it.
-    const buf = await Promise.race([
-      upstream.arrayBuffer(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error("Response body timed out")), REQUEST_TIMEOUT_MS)),
-    ]);
-    if (buf.byteLength > MAX_BYTES) return sendJson(413, { error: "Response too large" });
+    // Body was read with incremental size + deadline enforcement inside
+    // validatedRequest. Some servers ignore accept-encoding: identity — if the
+    // body still arrives compressed, decompress (and re-check the cap).
+    let buf = upstream.body;
+    const enc = (upstream.headers.get("content-encoding") || "").toLowerCase();
+    if (enc === "gzip" || enc === "deflate" || enc === "br") {
+      buf = enc === "gzip" ? zlib.gunzipSync(buf) : enc === "deflate" ? zlib.inflateSync(buf) : zlib.brotliDecompressSync(buf);
+      if (buf.length > MAX_BYTES) return sendJson(413, { error: "Response too large" });
+    }
+    if (buf.length > MAX_BYTES) return sendJson(413, { error: "Response too large" });
 
     if (contentType.includes("text/html") || contentType.includes("application/xhtml")) {
       const text = Buffer.from(buf).toString("utf8");

@@ -107,8 +107,13 @@ connection is the recommended path). To use it:
 
 - The proxy works best for simple, informational sites. Destinations that
   need cookies, logins, or heavy JavaScript may partially break — pages are
-  rewritten and sandboxed on purpose.
+  rewritten and sandboxed on purpose. Responses are capped at 5 MB and 12
+  seconds (enforced incrementally at the connection level), and private/
+  internal addresses (including DNS names that resolve to them) are blocked.
 - Chat messages are capped at the most recent 500.
+- The JSON store serializes writes with a cross-process lock. If a process
+  crashes mid-write, mutations return "Server is busy" until you stop all
+  instances and delete `<data>/db.json.lock` — the lock is never auto-deleted.
 - Passwords are never stored in plain text; sessions are 30-day bearer tokens.
 - `VAULT_API_BASE` (optional): if you serve the frontend from a different
   origin than the backend, set `window.VAULT_API_BASE` before `js/api.js`

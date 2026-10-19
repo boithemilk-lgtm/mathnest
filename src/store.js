@@ -45,20 +45,11 @@ let cachedMtime = 0;
 // volume, so every read-modify-write mutation runs inside this lock to avoid
 // lost updates. The lock FAILS CLOSED: if it cannot be acquired, the mutation
 // is refused with a busy error — a writer never proceeds without the lock.
-// A leftover lock is only cleared when the holder's PID is provably not
-// running on this machine (never on age alone). Known limitation: on a
-// multi-node cluster sharing one volume, PID checks can't see other nodes.
+// A lock left behind by a crashed holder is NEVER deleted automatically: no
+// age or PID heuristic can prove a lock is dead across every node that shares
+// the volume. Recovery: stop all instances, delete <data>/db.json.lock.
 const LOCK_FILE = DB_FILE + ".lock";
 const LOCK_WAIT_MS = 5000;
-
-function processAlive(pid) {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (e) {
-    return e && e.code === "EPERM"; // exists, just owned by another user
-  }
-}
 
 export function withLock(fn) {
   // The data directory must exist before the lock file can be created.
@@ -73,14 +64,7 @@ export function withLock(fn) {
       acquired = true;
       break;
     } catch (e) {
-      // Someone else holds it. Clear it only if the holder is provably dead.
-      try {
-        const holder = JSON.parse(fs.readFileSync(LOCK_FILE, "utf8"));
-        if (holder && holder.pid && !processAlive(holder.pid)) {
-          try { fs.unlinkSync(LOCK_FILE); } catch (_) {}
-          continue;
-        }
-      } catch (_) { /* unreadable — keep waiting, never break it blind */ }
+      // Someone else holds it — wait. Never break or delete it.
       const until = Date.now() + 3 + Math.floor(Math.random() * 8);
       while (Date.now() < until) { /* brief spin */ }
     }
@@ -100,6 +84,10 @@ export function withLock(fn) {
 }
 
 export function getDb() {
+  // Read-only: this NEVER writes. If the file is missing, an in-memory empty
+  // db is returned and the first locked mutation persists it. If the file is
+  // corrupt or unreadable, this THROWS — a broken database is never silently
+  // replaced with an empty one.
   try {
     const st = fs.statSync(DB_FILE);
     if (!cache || st.mtimeMs !== cachedMtime) {
@@ -108,11 +96,13 @@ export function getDb() {
     }
     return cache;
   } catch (e) {
-    // First boot: create the directory and a fresh database.
-    cache = emptyDb();
-    try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (_) {}
-    saveDb(cache);
-    return cache;
+    if (e && e.code === "ENOENT") {
+      cache = emptyDb();
+      cachedMtime = 0;
+      return cache;
+    }
+    cache = null;
+    throw new Error("Database file is unreadable: " + (e && e.message ? e.message : e));
   }
 }
 

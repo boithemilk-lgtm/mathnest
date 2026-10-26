@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEXUS — Your Space Online</title>
+  <meta name="description" content="A little space for community, messages, games, discovery and more.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0d13'/%3E%3Ctext x='16' y='22' font-size='16' fill='%2362e88c' text-anchor='middle' font-family='monospace'%3E67%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/vault.css">
+  <link rel="stylesheet" href="css/vault-redesign.css">
+  <link rel="stylesheet" href="css/community-ui.css">
+</head>
+<body class="nexus-intro-active">
+  <section class="nexus-intro" id="nexusIntro" aria-label="Welcome to Nexus">
+    <canvas class="nexus-stars" id="nexusStars" aria-hidden="true"></canvas>
+    <div class="nexus-intro-grid" aria-hidden="true"></div>
+    <div class="nexus-intro-vignette" aria-hidden="true"></div>
+    <div class="nexus-intro-content">
+      <div class="nexus-overline"><span class="nexus-live-dot"></span> YOUR CORNER OF THE INTERNET <span class="nexus-overline-line"></span> EST. 2026</div>
+      <div class="nexus-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <h1 class="nexus-wordmark">NEXUS<span>.</span></h1>
+      <p class="nexus-intro-subtitle">YOUR SPACE. YOUR PEOPLE. YOUR THINGS.</p>
+      <p class="nexus-intro-copy">a place to talk, share ideas, discover things, play a little, and make it your own.</p>
+      <button class="nexus-enter" id="nexusEnter" type="button"><span>ENTER NEXUS</span><b aria-hidden="true">↗</b></button>
+      <div class="nexus-intro-footer"><span>COMMUNITY <i>•</i> MESSAGES <i>•</i> DISCOVERY</span><span class="nexus-mouse-hint"><b></b> MOVE TO INTERACT</span></div>
+    </div>
+    <div class="nexus-coordinate nexus-coordinate-left" aria-hidden="true">NXS / 067 / ONLINE</div>
+    <div class="nexus-coordinate nexus-coordinate-right" aria-hidden="true">PRESS ENTER ↗</div>
+  </section>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <span class="vault-logo nexus-brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="12" cy="12" r="4"/><path d="M12 10.5v-1M12 14.5v1M10.5 12h-1M14.5 12h-1"/></svg>
+        </span>
+        <div>
+          <h1 class="vault-title">NEXUS<span class="brand-period">.</span></h1>
+          <p class="vault-tag">YOUR ONLINE SPACE</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-ghost theme-btn" id="themeBtn" type="button" title="Switch theme">◐ Appearance</button>
+        <a class="exit-link" href="index.html">← MathNest</a>
+        <div class="user-chip" id="userChip" hidden></div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Nexus sections">
+      <button class="tab is-active" role="tab" aria-selected="true" data-tab="home">⌂ Home</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="chat">◎ Community</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="dms">✉ Messages</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="games">▦ Discover</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="suggestions">✦ Ideas</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="proxy">↗ Web</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="extras">＋ Extras</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="settings">⚙ Customize</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ DASHBOARD ============ -->
+    <section class="panel is-active" data-panel="home" role="tabpanel">
+      <div class="dashboard-welcome">
+        <div class="dashboard-copy">
+          <div class="eyebrow"><span class="status-pip"></span> A SPACE THAT'S YOURS</div>
+          <h2>A little space for <span>everything.</span></h2>
+          <p>Catch up with people, message friends, discover something new, or take a break. Make it feel like yours.</p>
+          <div class="dashboard-actions">
+            <button class="btn-primary" type="button" data-go="chat">Visit the community <span aria-hidden="true">↗</span></button>
+            <button class="btn-ghost" type="button" data-go="dms">Open messages</button>
+          </div>
+        </div>
+        <div class="dashboard-art" aria-hidden="true">
+          <div class="orb orb-one"></div><div class="orb orb-two"></div>
+          <div class="controller-art"><svg viewBox="0 0 180 120" fill="none"><path d="M43 28h94c14 0 23 10 27 25l10 35c4 15-10 25-22 16l-25-20H53L28 104C16 113 2 103 6 88l10-35c4-15 13-25 27-25Z" fill="url(#pad)" stroke="rgba(255,255,255,.65)" stroke-width="2"/><path d="M39 51v28M25 65h28" stroke="#1b1732" stroke-width="7" stroke-linecap="round"/><circle cx="133" cy="56" r="6" fill="#1b1732"/><circle cx="148" cy="71" r="6" fill="#1b1732"/><circle cx="117" cy="71" r="6" fill="#1b1732"/><circle cx="133" cy="86" r="6" fill="#1b1732"/><defs><linearGradient id="pad" x1="18" y1="22" x2="165" y2="107"><stop stop-color="#b8a6ff"/><stop offset="1" stop-color="#63e6be"/></linearGradient></defs></svg></div>
+          <div class="floating-chip chip-top">✦ PLAY YOUR WAY</div><div class="floating-chip chip-bottom">● ALL SYSTEMS READY</div>
+        </div>
+      </div>
+      <div class="dashboard-stats">
+        <div class="stat-card"><span class="stat-icon">🎮</span><div><strong id="statGamesPlayed">0</strong><span>Games played</span></div></div>
+        <div class="stat-card"><span class="stat-icon">🏆</span><div><strong id="statAchievements">0</strong><span>Achievements</span></div></div>
+        <div class="stat-card"><span class="stat-icon">⭐</span><div><strong id="statBestScore">—</strong><span>Top personal score</span></div></div>
+      </div>
+      <div class="section-heading"><div><span class="eyebrow">PICK UP WHEREVER</span><h2>Explore a little</h2></div><button class="text-button" type="button" data-go="games">Browse everything ↗</button></div>
+      <div class="featured-grid">
+        <button class="feature-tile feature-main" type="button" data-launch-game="dungeon"><span class="feature-tag">CO-OP ADVENTURE</span><span class="feature-emoji">🗝️</span><strong>Dungeon of Broken Dreams</strong><span>Team up, explore, and make it out together.</span><i>Play with a friend ↗</i></button>
+        <button class="feature-tile feature-snake" type="button" data-launch-game="snake"><span class="feature-tag">ARCADE CLASSIC</span><span class="feature-emoji">🐍</span><strong>Neon Snake</strong><span>One more run. One more high score.</span><i>Play now ↗</i></button>
+        <button class="feature-tile feature-blocks" type="button" data-launch-game="tetris"><span class="feature-tag">PUZZLE</span><span class="feature-emoji">🧩</span><strong>Blockfall</strong><span>Stack smart and chase your best.</span><i>Play now ↗</i></button>
+      </div>
+      <div class="section-heading"><div><span class="eyebrow">YOUR CORNER</span><h2>Quick links</h2></div></div>
+      <div class="quick-grid">
+        <button class="quick-card" type="button" data-go="chat"><span>💬</span><strong>Community</strong><small>Join the room and catch up</small><b>↗</b></button>
+        <button class="quick-card" type="button" data-go="dms"><span>✉️</span><strong>Direct messages</strong><small>Pick up a private conversation</small><b>↗</b></button>
+        <button class="quick-card" type="button" data-go="settings"><span>🎨</span><strong>Make it yours</strong><small>Colors, theme, and layout</small><b>↗</b></button>
+      </div>
+    </section>
+
+    <!-- ============ GAMES ============ -->
+    <section class="panel" data-panel="games" role="tabpanel">
+      <div class="panel-head">
+        <h2>Discover</h2>
+        <p>A mix of things to do when you feel like it — small games, community features, and places to explore. No pressure, just browse.</p>
+      </div>
+      <div class="game-grid" id="gameGrid">
+        <a class="game-card dungeon-card" href="dungeon.html" style="display:block; --card-glow: rgba(139,124,248,0.18); text-decoration:none; color:inherit;">
+          <div class="game-thumb" style="background:linear-gradient(135deg,#17182b,#30213d);">🗡️</div>
+          <h3>Dungeon of Broken Dreams <span class="game-best">2-player co-op</span></h3>
+          <p>Team up online, loot ancient rooms, fight monsters, and find a way out alive.</p>
+        </a>
+      </div>
+      <div class="leaderboard-card">
+        <h3>🏆 Global leaderboard</h3>
+        <p class="muted">Top scores across the server. Log in and set a record.</p>
+        <div class="leaderboard-grid" id="leaderboardGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============ CHAT ============ -->
+    <section class="panel" data-panel="chat" role="tabpanel">
+      <div class="chat-layout" id="chatLoggedOut">
+        <div class="auth-card">
+          <h2>Join the chatroom</h2>
+          <p class="muted">Make an account (username + password) to chat with everyone in Nexus. Accounts live on the server, not this device.</p>
+          <div class="auth-tabs">
+            <button class="auth-tab is-active" data-auth="signup">Sign up</button>
+            <button class="auth-tab" data-auth="login">Log in</button>
+          </div>
+          <form id="authForm" class="auth-form">
+            <label class="field">
+              <span>Username</span>
+              <input id="authUser" type="text" maxlength="20" placeholder="e.g. pixelpanda" autocomplete="username" required>
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input id="authPass" type="password" minlength="6" placeholder="6+ characters" autocomplete="current-password" required>
+            </label>
+            <div class="field">
+              <span>Pick your avatar</span>
+              <div class="avatar-grid" id="avatarGrid"></div>
+            </div>
+            <p class="auth-error" id="authError" role="alert"></p>
+            <button class="btn-primary" type="submit" id="authSubmit">Sign up</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="chat-layout" id="chatLoggedIn" hidden>
+        <aside class="dm-sidebar">
+          <div class="dm-sidebar-head"><div><span class="eyebrow">YOUR INBOX</span><h3>Messages</h3></div><button class="icon-button" id="newDmBtn" type="button" title="Start a direct message" aria-label="Start a direct message">＋</button></div>
+          <label class="dm-search-wrap"><span aria-hidden="true">⌕</span><input id="dmSearch" type="search" placeholder="Find a conversation…" autocomplete="off"></label>
+          <div class="dm-section-label">RECENT</div>
+          <div class="dm-recent-list" id="dmRecentList"><p class="muted dm-empty">Your conversations will show up here.</p></div>
+          <div class="dm-section-label dm-online-label">ONLINE <span id="onlineCount">0</span></div>
+          <ul class="online-list" id="onlineList"></ul>
+        </aside>
+        <div class="chat-main">
+          <div class="community-toolbar"><div><span class="community-channel-icon" id="communityChannelIcon">#</span><div><strong id="communityChannelTitle">community</strong><small id="communityChannelSubtitle">a public room for everyone</small></div></div><label class="message-search"><span>⌕</span><input id="messageSearch" type="search" placeholder="Search loaded messages…" autocomplete="off"></label></div>
+          <div class="dm-bar" id="dmBar" hidden>
+            <button class="btn-ghost" id="dmBack" type="button">← Room</button>
+            <span class="dm-title" id="dmTitle"></span>
+          </div>
+          <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+          <div class="typing-line" id="typingLine" aria-hidden="true"></div>
+          <form class="chat-input" id="chatForm">
+            <textarea id="chatText" maxlength="500" placeholder="Message the community…" autocomplete="off" rows="1"></textarea>
+            <button class="btn-primary" type="submit">Send</button>
+          </form>
+        </div>
+        <aside class="chat-side chat-info-side">
+          <div class="community-info-icon">◎</div><h3>Community</h3><p class="muted">A shared space to say hi, swap ideas, and get to know people.</p>
+          <div class="info-divider"></div><div class="community-rule"><strong>Be decent.</strong><span>Keep it friendly and respect other people.</span></div>
+          <button class="btn-ghost" id="logoutBtn" type="button">Log out</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ DIRECT MESSAGES ============ -->
+    <section class="panel" data-panel="dms" role="tabpanel">
+      <div class="panel-head"><span class="eyebrow">PRIVATE CONVERSATIONS</span><h2>Your messages</h2><p>Keep one-on-one conversations easy to find. Start a DM from an online member or click the message icon next to a community post.</p></div>
+      <div class="dm-inbox-toolbar"><label class="dm-search-wrap"><span>⌕</span><input id="dmInboxSearch" type="search" placeholder="Search conversations…" autocomplete="off"></label><button class="btn-primary" type="button" id="inboxNewDm">＋ New message</button></div>
+      <div class="dm-inbox-grid" id="dmInboxList"><div class="dm-inbox-empty"><span>✉</span><h3>No conversations yet</h3><p>Start by messaging someone from the community.</p><button class="btn-ghost" type="button" data-go="chat">Open community</button></div></div>
+    </section>
+
+    <!-- ============ CUSTOMIZE ============ -->
+    <section class="panel" data-panel="settings" role="tabpanel">
+      <div class="panel-head"><span class="eyebrow">YOUR SPACE, YOUR RULES</span><h2>Make it yours</h2><p>Personalize the look and feel. These preferences stay on this device and don't change anyone else's experience.</p></div>
+      <div class="settings-layout">
+        <div class="settings-group"><div class="settings-group-heading"><span class="settings-icon">◐</span><div><h3>Appearance</h3><p>Choose a theme that feels right.</p></div></div>
+          <label class="setting-row"><span><strong>Color theme</strong><small>Light, dark, or follow your device.</small></span><select id="settingTheme"><option value="system">Use device setting</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+          <label class="setting-row"><span><strong>Accent color</strong><small>Buttons, highlights, and active states.</small></span><input id="settingAccent" type="color" value="#6c70e8" aria-label="Accent color"></label>
+          <label class="setting-row"><span><strong>Layout density</strong><small>Choose more breathing room or tighter spacing.</small></span><select id="settingDensity"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+          <label class="setting-row"><span><strong>Reduce motion</strong><small>Turn down transitions and moving effects.</small></span><input id="settingMotion" type="checkbox"></label>
+        </div>
+        <div class="settings-group"><div class="settings-group-heading"><span class="settings-icon">⌘</span><div><h3>Chat preferences</h3><p>Small quality-of-life options.</p></div></div>
+          <label class="setting-row"><span><strong>Show timestamps</strong><small>Display the time beside each message.</small></span><input id="settingTimestamps" type="checkbox" checked></label>
+          <label class="setting-row"><span><strong>Enter sends messages</strong><small>Use Enter to send in chat.</small></span><input id="settingEnterSend" type="checkbox" checked></label>
+          <div class="settings-note"><span>ⓘ</span><p>These controls change your local interface only. Server features such as message history and account data continue to use your existing MathNest backend.</p></div>
+        </div>
+      </div>
+      <div class="settings-footer"><button class="btn-ghost" id="resetSettings" type="button">Reset appearance</button><span id="settingsStatus" role="status">Changes save automatically.</span></div>
+    </section>
+
+    <!-- ============ SUGGESTIONS ============ -->
+    <section class="panel" data-panel="suggestions" role="tabpanel">
+      <div class="panel-head"><span class="eyebrow">HELP SHAPE MATHNEST</span><h2>Got an idea?</h2><p>Suggest a game, a feature, or a quality-of-life improvement. Good ideas start here.</p></div>
+      <div class="suggestions-layout"><form id="suggestionForm" class="suggestion-form"><label class="field"><span>Suggestion title</span><input id="suggestionTitle" maxlength="70" placeholder="e.g. Add a party system" required></label><label class="field"><span>Tell us more</span><textarea id="suggestionText" maxlength="500" rows="4" placeholder="What should we add, and why would it be useful?" required></textarea></label><p class="suggestion-status" id="suggestionStatus" role="status"></p><button class="btn-primary" type="submit">Send suggestion ↗</button></form><div class="suggestions-feed-wrap"><div class="section-heading"><div><span class="eyebrow">COMMUNITY IDEAS</span><h2>Recent suggestions</h2></div></div><div id="suggestionsFeed" class="suggestions-feed"><p class="muted">Loading ideas…</p></div></div></div>
+    </section>
+
+    <!-- ============ PROXY ============ -->
+    <section class="panel" data-panel="proxy" role="tabpanel">
+      <div class="panel-head">
+        <h2>Built-in proxy</h2>
+        <p>Browse the web through this site — pages are fetched server-side and links stay inside the proxy, though images, scripts and styles on a page may still load straight from the destination. Best for simple, informational sites; complex apps that need logins may not work.</p>
+      </div>
+      <form class="proxy-bar" id="proxyForm">
+        <input id="proxyUrl" type="text" placeholder="https://en.wikipedia.org" spellcheck="false" autocomplete="off">
+        <button class="btn-primary" type="submit">Go</button>
+      </form>
+      <div class="proxy-quick">
+        <span>Quick:</span>
+        <button class="quick-link" data-url="https://en.wikipedia.org/wiki/Main_Page">Wikipedia</button>
+        <button class="quick-link" data-url="https://duckduckgo.com/html/?q=weather">DuckDuckGo</button>
+        <button class="quick-link" data-url="https://example.com">Example.com</button>
+        <button class="quick-link" data-url="http://textfiles.com">Textfiles</button>
+      </div>
+      <div class="proxy-frame-wrap">
+        <iframe id="proxyFrame" class="proxy-frame" sandbox="allow-scripts allow-forms allow-popups" title="Proxied website"></iframe>
+        <div class="proxy-empty" id="proxyEmpty">
+          <p class="big">🌐</p>
+          <p>Enter a URL above to start browsing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EXTRAS ============ -->
+    <section class="panel" data-panel="extras" role="tabpanel">
+      <div class="panel-head">
+        <h2>Fun stuff</h2>
+        <p>Little toys for when you need 30 seconds of chaos between rounds.</p>
+      </div>
+      <div class="extras-grid">
+        <div class="extra-card wide">
+          <h3>🏆 Achievements <span class="ach-count" id="achCount"></span></h3>
+          <p class="muted">Milestones from the games and the chatroom. Log in to start collecting.</p>
+          <div class="trophy-grid" id="trophyGrid"></div>
+        </div>
+        <div class="extra-card">
+          <h3>🥁 Drum pad</h3>
+          <p class="muted">Tap the pads or press keys 1–9.</p>
+          <div class="drum-grid" id="drumGrid"></div>
+        </div>
+        <div class="extra-card">
+          <h3>⌨️ Hacker typer</h3>
+          <p class="muted">Click the screen, then mash any keys. Instant hacker.</p>
+          <pre class="typer" id="typer" tabindex="0"></pre>
+          <div class="typer-status" id="typerStatus"></div>
+        </div>
+        <div class="extra-card">
+          <h3>🧠 Fun facts</h3>
+          <p class="muted">Questionable trivia, guaranteed accurate-ish.</p>
+          <div class="fact-card" id="factCard">
+            <p class="fact-text" id="factText"></p>
+            <button class="btn-ghost" id="factBtn" type="button">Another one</button>
+          </div>
+        </div>
+        <div class="extra-card admin-card" id="adminCard" hidden>
+          <h3>🛡️ Admin</h3>
+          <p class="muted">Site operator tools.</p>
+          <button class="btn-ghost" id="backupBtn" type="button">⬇ Download backup (db.json)</button>
+        </div>
+      </div>
+      <p class="panic-hint muted">Psst — double-tap <strong>Esc</strong> anytime to instantly look busy.</p>
+    </section>
+  </main>
+
+  <!-- Floating controller navigation -->
+  <div class="arcade-dock" id="arcadeDock">
+    <button class="dock-trigger" id="dockTrigger" type="button" aria-label="Open site navigation" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 7h9.6c2.1 0 3.6 1.4 4.2 3.6l1 5.1c.4 2.1-1.6 3.3-3.2 2l-2.8-2.2H8l-2.8 2.2c-1.6 1.3-3.6.1-3.2-2l1-5.1C3.6 8.4 5.1 7 7.2 7Z"/><path d="M7 10v4M5 12h4M15.7 10.5h.1M18 13h.1"/></svg><span>MENU</span></button>
+    <div class="dock-menu" id="dockMenu" aria-label="Site navigation">
+      <div class="dock-label">YOUR SPACE</div>
+      <button class="dock-item is-active" data-dock="home" type="button"><span>⌂</span>Home</button>
+      <button class="dock-item" data-dock="chat" type="button"><span>◎</span>Community</button>
+      <button class="dock-item" data-dock="dms" type="button"><span>✉</span>Messages</button>
+      <button class="dock-item" data-dock="games" type="button"><span>▦</span>Discover</button>
+      <button class="dock-item" data-dock="suggestions" type="button"><span>✦</span>Ideas</button>
+      <button class="dock-item" data-dock="proxy" type="button"><span>↗</span>Web</button>
+      <button class="dock-item" data-dock="extras" type="button"><span>＋</span>Extras</button>
+      <button class="dock-item" data-dock="settings" type="button"><span>⚙</span>Customize</button>
+      <div class="dock-divider"></div>
+      <button class="dock-item" data-dock="profile" type="button"><span>👤</span>My profile</button>
+    </div>
+  </div>
+
+  <!-- Account gate: the existing secure account form is moved here by vault-shell.js. -->
+  <div class="auth-gate" id="authGate" hidden role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="auth-gate-backdrop"></div><div class="auth-gate-panel"><div class="gate-brand"><span class="gate-logo">✦</span><span>NEXUS <b>COMMUNITY</b></span></div><div class="gate-welcome"><span class="eyebrow">YOUR NEXT ADVENTURE STARTS HERE</span><h2 id="gateTitle">Make yourself at home.</h2><p>Create an account or log in to join the community, message people, and keep your account progress saved.</p><div class="gate-benefits"><span>✓ Saved high scores</span><span>✓ Achievements & stats</span><span>✓ Community access</span></div></div><div id="authGateSlot" class="auth-gate-slot"></div><a class="gate-back" href="index.html">← Back to MathNest</a></div>
+  </div>
+
+  <!-- Profile drawer -->
+  <div class="profile-drawer" id="profileDrawer" hidden><div class="profile-card"><button class="profile-close" id="profileClose" type="button" aria-label="Close profile">×</button><span class="eyebrow">YOUR PROFILE</span><div class="profile-avatar" id="profileAvatar">🎮</div><h2 id="profileName">Player</h2><p id="profileBio">Your profile</p><div class="profile-divider"></div><div class="profile-metrics"><div><strong id="profilePlayed">0</strong><span>Games played</span></div><div><strong id="profileTrophies">0</strong><span>Achievements</span></div></div><button class="btn-ghost" id="profileLogout" type="button">Log out</button></div></div>
+
+  <!-- ============ GAME MODAL ============ -->
+  <div class="game-modal" id="gameModal" hidden>
+    <div class="game-modal-inner">
+      <div class="game-modal-head">
+        <h2 id="gameTitle">Game</h2>
+        <div class="game-stats">
+          <span>Score <strong id="gameScore">0</strong></span>
+          <span>Best <strong id="gameBest">0</strong></span>
+        </div>
+        <div class="game-controls">
+          <button class="btn-ghost" id="gameRestart" type="button">Restart</button>
+          <button class="btn-primary" id="gameClose" type="button">Close ✕</button>
+        </div>
+      </div>
+      <p class="game-help muted" id="gameHelp"></p>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REACTION PICKER ============ -->
+  <div class="reaction-picker" id="reactionPicker" hidden></div>
+
+  <!-- ============ ACHIEVEMENT TOAST ============ -->
+  <div class="ach-toast" id="achToast" hidden>
+    <span class="ach-toast-emoji" id="achToastEmoji">🏆</span>
+    <div>
+      <div class="ach-toast-title">Achievement unlocked!</div>
+      <div class="ach-toast-name" id="achToastName"></div>
+    </div>
+  </div>
+
+  <!-- ============ PANIC SCREEN (fake math) ============ -->
+  <div class="panic-screen" id="panicScreen" hidden>
+    <div class="panic-inner">
+      <div class="panic-head">
+        <h2>Math Practice — Quick Quiz</h2>
+        <p class="muted">Solve as many as you can. Answers are checked instantly.</p>
+      </div>
+      <div class="panic-card">
+        <p class="panic-question" id="panicQuestion">7 × 8 = ?</p>
+        <form id="panicForm">
+          <input id="panicAnswer" type="text" inputmode="numeric" placeholder="Your answer" autocomplete="off">
+          <button class="btn-primary" type="submit">Check</button>
+        </form>
+        <p class="panic-feedback" id="panicFeedback"></p>
+        <p class="panic-score muted" id="panicScore">Solved: 0</p>
+      </div>
+      <p class="muted panic-tip">Done practicing? Double-tap Esc to go back.</p>
+    </div>
+  </div>
+
+  <script src="js/nexus-intro.js" defer></script>
+  <script type="module" src="js/vault.js"></script>
+  <script type="module" src="js/vault-shell.js"></script>
+</body>
+</html>
